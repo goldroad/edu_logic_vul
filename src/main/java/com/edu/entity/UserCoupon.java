@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_coupons")
+@Table(name = "user_coupon")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

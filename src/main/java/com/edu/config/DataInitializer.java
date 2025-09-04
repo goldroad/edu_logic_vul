@@ -17,6 +17,8 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
+        // 延迟执行，确保表已经创建
+        Thread.sleep(2000);
         initializeDataFromSql();
     }
     

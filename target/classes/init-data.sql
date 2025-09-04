@@ -46,8 +46,8 @@ SELECT '网络安全基础', '了解网络安全基础知识，学习常见攻�
 FROM user u WHERE u.username = 'teacher';
 
 -- 创建测试优惠券
-INSERT IGNORE INTO coupon (name, code, type, value, min_amount, total_count, used_count, start_time, end_time, create_time, update_time)
+INSERT IGNORE INTO coupon (name, code, type, discount_value, min_amount, total_count, used_count, start_time, end_time, create_time)
 VALUES 
-('新用户专享', 'NEW50', 'FIXED', 50.00, 100.00, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
-('限时8折', 'DISCOUNT20', 'PERCENT', 0.2, 200.00, 50, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW()),
-('并发测试券', 'CONCURRENT', 'FIXED', 10.00, 50.00, 5, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
+('新用户专享', 'NEW50', 'FIXED', 50.00, 100.00, 100, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW()),
+('限时8折', 'DISCOUNT20', 'PERCENT', 0.2, 200.00, 50, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW()),
+('并发测试券', 'CONCURRENT', 'FIXED', 10.00, 50.00, 5, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW());

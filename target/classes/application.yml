@@ -9,6 +9,10 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  web:
+    resources:
+      static-locations: classpath:/static/
     
   jpa:
     hibernate:
