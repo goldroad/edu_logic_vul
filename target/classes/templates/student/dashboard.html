@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生中心 - 在线教育系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            background: white;
+            min-height: calc(100vh - 76px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #667eea;
+        }
+        .sidebar .nav-link.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .main-content {
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .course-card {
+            transition: transform 0.3s;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+        .vulnerability-badge {
+            background: #dc3545;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        .balance-display {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/edu/student/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>在线教育系统
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span th:text="${user.realName}">学生姓名</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/edu/student/profile">
+                            <i class="fas fa-user me-2"></i>个人资料
+                        </a></li>
+                        <li><a class="dropdown-item" href="/edu/student/settings">
+                            <i class="fas fa-cog me-2"></i>账户设置
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/edu/auth/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="/edu/student/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>仪表板
+                        </a>
+                        <a class="nav-link" href="/edu/student/courses">
+                            <i class="fas fa-book me-2"></i>我的课程
+                        </a>
+                        <a class="nav-link" href="/edu/student/orders">
+                            <i class="fas fa-shopping-cart me-2"></i>订单管理
+
+                        </a>
+                        <a class="nav-link" href="/edu/student/coupons">
+                            <i class="fas fa-ticket-alt me-2"></i>优惠券
+
+                        </a>
+                        <a class="nav-link" href="/edu/student/profile">
+                            <i class="fas fa-user me-2"></i>个人资料
+
+                        </a>
+                        <a class="nav-link" href="/edu/student/files">
+                            <i class="fas fa-file me-2"></i>文件管理
+
+                        </a>
+                        <a class="nav-link" href="/edu/admin/dashboard" onclick="return testVerticalEscalation()">
+                            <i class="fas fa-shield-alt me-2"></i>管理后台
+
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <!-- 欢迎信息 -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="stats-card">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h2>欢迎回来，<span th:text="${user.realName}">学生姓名</span>！</h2>
+                                        <p class="mb-0">继续您的学习之旅，探索更多知识</p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="balance-display">
+                                            ¥<span th:text="${user.balance}">1000.00</span>
+                                        </div>
+                                        <small>账户余额</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 统计卡片 -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-book fa-2x text-primary mb-3"></i>
+                                    <h4>12</h4>
+                                    <p class="text-muted">已购课程</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-clock fa-2x text-success mb-3"></i>
+                                    <h4>156</h4>
+                                    <p class="text-muted">学习时长(小时)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-certificate fa-2x text-warning mb-3"></i>
+                                    <h4>8</h4>
+                                    <p class="text-muted">获得证书</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-ticket-alt fa-2x text-info mb-3"></i>
+                                    <h4>3</h4>
+                                    <p class="text-muted">可用优惠券</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 推荐课程 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-star me-2"></i>推荐课程
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4" th:each="course : ${courses}">
+                                    <div class="card course-card">
+                                        <img src="https://via.placeholder.com/300x200" class="card-img-top" alt="课程封面">
+                                        <div class="card-body">
+                                            <h6 class="card-title" th:text="${course.title}">课程标题</h6>
+                                            <p class="card-text text-muted" th:text="${course.description}">课程描述</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="text-danger h5">¥<span th:text="${course.price}">199</span></span>
+                                                    <small class="text-muted text-decoration-line-through ms-2">
+                                                        ¥<span th:text="${course.originalPrice}">299</span>
+                                                    </small>
+                                                </div>
+                                                <button class="btn btn-primary btn-sm" 
+                                                        onclick="buyCourse(this)" 
+                                                        th:data-course-id="${course.id}"
+                                                        th:data-course-price="${course.price}">
+                                                    立即购买
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 漏洞测试区域 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>功能测试区域
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>注意：</strong>以下功能包含故意设计的安全漏洞，仅用于安全测试和学习目的。
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-user me-2"></i>用户信息</h6>
+                                    <p>查看用户个人信息：</p>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="userIdInput" placeholder="输入用户ID" value="1">
+                                        <button class="btn btn-outline-danger" onclick="viewOtherUserProfile()">
+                                            查看用户资料
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-cog me-2"></i>系统功能</h6>
+                                    <p>访问系统功能：</p>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-danger" onclick="accessAdminPanel()">
+                                            访问管理后台
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="viewAllUsers()">
+                                            查看所有用户
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-file-alt me-2"></i>文件管理</h6>
+                                    <p>读取系统文件：</p>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="filePathInput" 
+                                               placeholder="文件路径" value="../../../etc/passwd">
+                                        <button class="btn btn-outline-danger" onclick="readFile()">
+                                            读取文件
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-ticket-alt me-2"></i>优惠券管理</h6>
+                                    <p>领取优惠券：</p>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-danger" onclick="concurrentCouponClaim()">
+                                            领取优惠券
+                                        </button>
+                                        <small class="text-muted">领取限量优惠券</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 购买课程（包含支付漏洞）
+        function buyCourse(button) {
+            const courseId = button.getAttribute('data-course-id');
+            const originalPrice = button.getAttribute('data-course-price');
+            
+            // 弹出购买对话框
+            const newPrice = prompt(`课程原价：¥${originalPrice}\n请输入您想支付的价格:`, originalPrice);
+            if (newPrice === null) return;
+            
+            const quantity = prompt('请输入购买数量（可输入负数）:', '1');
+            if (quantity === null) return;
+            
+            const discount = prompt('请输入折扣率（0-1之间，如0.1表示1折）:', '0.1');
+            if (discount === null) return;
+            
+            // 发送购买请求
+            fetch('/edu/student/buy-course', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    courseId: courseId,
+                    price: parseFloat(newPrice),
+                    quantity: parseInt(quantity),
+                    discount: parseFloat(discount),
+                    shipping: -10 // 负运费
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`购买成功！实际支付：¥${data.actualAmount}`);
+                    location.reload();
+                } else {
+                    alert('购买失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('购买过程中发生错误');
+            });
+        }
+        
+        // 水平越权：查看其他用户资料
+        function viewOtherUserProfile() {
+            const userId = document.getElementById('userIdInput').value;
+            window.open(`/edu/student/profile?id=${userId}`, '_blank');
+        }
+        
+        // 垂直越权：访问管理后台
+        function accessAdminPanel() {
+            window.open('/edu/admin/dashboard?role=ADMIN', '_blank');
+        }
+        
+        // 垂直越权：查看所有用户
+        function viewAllUsers() {
+            window.open('/edu/api/users?role=ADMIN', '_blank');
+        }
+        
+        // 垂直越权测试
+        function testVerticalEscalation() {
+            const confirmed = confirm('这将尝试以管理员身份访问后台，是否继续？');
+            return confirmed;
+        }
+        
+        // 任意文件读取
+        function readFile() {
+            const filePath = document.getElementById('filePathInput').value;
+            window.open(`/edu/api/file/read?path=${encodeURIComponent(filePath)}`, '_blank');
+        }
+        
+        // 并发优惠券领取测试
+        function concurrentCouponClaim() {
+            const couponId = 3; // 并发测试券ID
+            const promises = [];
+            
+            // 同时发送10个请求
+            for (let i = 0; i < 10; i++) {
+                promises.push(
+                    fetch('/edu/student/claim-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ couponId: couponId })
+                    })
+                );
+            }
+            
+            Promise.all(promises)
+                .then(responses => Promise.all(responses.map(r => r.json())))
+                .then(results => {
+                    const successCount = results.filter(r => r.success).length;
+                    alert(`并发测试完成！成功领取 ${successCount} 张优惠券（正常情况下应该只能领取1张）`);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('并发测试过程中发生错误');
+                });
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 可以在这里添加页面初始化逻辑
+            console.log('学生仪表板加载完成');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的优惠券 - 在线教育系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            background: white;
+            min-height: calc(100vh - 76px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #667eea;
+        }
+        .sidebar .nav-link.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .main-content {
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .coupon-card {
+            border: 2px dashed #e9ecef;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .coupon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .coupon-available {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+        .coupon-used {
+            border-color: #6c757d;
+            background: #f8f9fa;
+            opacity: 0.7;
+        }
+        .coupon-expired {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            opacity: 0.8;
+        }
+        .coupon-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+        .coupon-type {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px dashed #dee2e6;
+        }
+        .coupon-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .status-available {
+            background: #28a745;
+            color: white;
+        }
+        .status-used {
+            background: #6c757d;
+            color: white;
+        }
+        .status-expired {
+            background: #dc3545;
+            color: white;
+        }
+        .coupon-corner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+        .corner-available {
+            border-width: 30px 30px 0 0;
+            border-color: #28a745 transparent transparent transparent;
+        }
+        .corner-used {
+            border-width: 30px 30px 0 0;
+            border-color: #6c757d transparent transparent transparent;
+        }
+        .corner-expired {
+            border-width: 30px 30px 0 0;
+            border-color: #dc3545 transparent transparent transparent;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .exchange-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/edu/student/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>在线教育系统
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${user != null ? user.realName : '学生'}">学生</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/edu/student/profile">
+                            <i class="fas fa-user me-2"></i>个人资料
+                        </a></li>
+                        <li><a class="dropdown-item" href="/edu/student/orders">
+                            <i class="fas fa-shopping-cart me-2"></i>我的订单
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/edu/auth/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/edu/student/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>学习中心
+                        </a>
+                        <a class="nav-link" href="/edu/student/courses">
+                            <i class="fas fa-book me-2"></i>我的课程
+                        </a>
+                        <a class="nav-link" href="/edu/student/orders">
+                            <i class="fas fa-shopping-cart me-2"></i>我的订单
+                        </a>
+                        <a class="nav-link active" href="/edu/student/coupons">
+                            <i class="fas fa-ticket-alt me-2"></i>优惠券
+                        </a>
+                        <a class="nav-link" href="/edu/student/files">
+                            <i class="fas fa-folder me-2"></i>学习资料
+                        </a>
+                        <a class="nav-link" href="/edu/student/profile">
+                            <i class="fas fa-user me-2"></i>个人资料
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <!-- 页面标题 -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-ticket-alt me-2"></i>我的优惠券</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/edu/student/dashboard">学习中心</a></li>
+                                <li class="breadcrumb-item active">优惠券</li>
+                            </ol>
+                        </nav>
+                    </div>
+
+                    <!-- 优惠券统计 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card stats-card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-ticket-alt fa-2x mb-2"></i>
+                                    <h4>8</h4>
+                                    <small>总优惠券</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center" style="background: #28a745; color: white;">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h4>5</h4>
+                                    <small>可使用</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center" style="background: #6c757d; color: white;">
+                                <div class="card-body">
+                                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                                    <h4>2</h4>
+                                    <small>已使用</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center" style="background: #dc3545; color: white;">
+                                <div class="card-body">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h4>1</h4>
+                                    <small>已过期</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 兑换优惠券 -->
+                    <div class="exchange-section">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4><i class="fas fa-gift me-2"></i>兑换优惠券</h4>
+                                <p class="mb-0">输入优惠券兑换码，立即获得专属优惠！</p>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="输入兑换码">
+                                    <button class="btn btn-primary" type="button">
+                                        <i class="fas fa-plus me-1"></i>兑换
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 优惠券筛选 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-select">
+                                        <option>全部优惠券</option>
+                                        <option>可使用</option>
+                                        <option>已使用</option>
+                                        <option>已过期</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select">
+                                        <option>全部类型</option>
+                                        <option>折扣券</option>
+                                        <option>满减券</option>
+                                        <option>新人券</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="搜索优惠券名称...">
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-1"></i>搜索
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 可使用的优惠券 -->
+                    <h5 class="mt-4 mb-3"><i class="fas fa-check-circle text-success me-2"></i>可使用 (5张)</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-available">
+                                <div class="coupon-corner corner-available"></div>
+                                <div class="coupon-status status-available">可使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">50%</div>
+                                            <div class="coupon-type">折扣券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>新人专享折扣券</h6>
+                                            <p class="text-muted mb-2">适用于所有课程，首次购买专享</p>
+                                            <div class="coupon-code mb-2">NEW50</div>
+                                            <small class="text-muted">有效期至: 2024-12-31</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-available">
+                                <div class="coupon-corner corner-available"></div>
+                                <div class="coupon-status status-available">可使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">¥30</div>
+                                            <div class="coupon-type">满减券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>满200减30优惠券</h6>
+                                            <p class="text-muted mb-2">购买课程满200元可用</p>
+                                            <div class="coupon-code mb-2">SAVE30</div>
+                                            <small class="text-muted">有效期至: 2024-10-15</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-available">
+                                <div class="coupon-corner corner-available"></div>
+                                <div class="coupon-status status-available">可使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">20%</div>
+                                            <div class="coupon-type">折扣券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>编程课程专享券</h6>
+                                            <p class="text-muted mb-2">仅限编程类课程使用</p>
+                                            <div class="coupon-code mb-2">CODE20</div>
+                                            <small class="text-muted">有效期至: 2024-11-30</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-available">
+                                <div class="coupon-corner corner-available"></div>
+                                <div class="coupon-status status-available">可使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">¥50</div>
+                                            <div class="coupon-type">满减券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>满300减50优惠券</h6>
+                                            <p class="text-muted mb-2">购买课程满300元可用</p>
+                                            <div class="coupon-code mb-2">BIG50</div>
+                                            <small class="text-muted">有效期至: 2024-09-30</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-available">
+                                <div class="coupon-corner corner-available"></div>
+                                <div class="coupon-status status-available">可使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">15%</div>
+                                            <div class="coupon-type">折扣券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>周末学习优惠券</h6>
+                                            <p class="text-muted mb-2">周末购买课程专享</p>
+                                            <div class="coupon-code mb-2">WEEKEND15</div>
+                                            <small class="text-muted">有效期至: 2024-10-31</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 已使用的优惠券 -->
+                    <h5 class="mt-4 mb-3"><i class="fas fa-times-circle text-secondary me-2"></i>已使用 (2张)</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-used">
+                                <div class="coupon-corner corner-used"></div>
+                                <div class="coupon-status status-used">已使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">¥20</div>
+                                            <div class="coupon-type">满减券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>满100减20优惠券</h6>
+                                            <p class="text-muted mb-2">已于2024-09-01使用</p>
+                                            <div class="coupon-code mb-2">FIRST20</div>
+                                            <small class="text-muted">使用订单: ORD20240901001</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-used">
+                                <div class="coupon-corner corner-used"></div>
+                                <div class="coupon-status status-used">已使用</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">10%</div>
+                                            <div class="coupon-type">折扣券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>学生专享折扣券</h6>
+                                            <p class="text-muted mb-2">已于2024-08-28使用</p>
+                                            <div class="coupon-code mb-2">STUDENT10</div>
+                                            <small class="text-muted">使用订单: ORD20240828002</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 已过期的优惠券 -->
+                    <h5 class="mt-4 mb-3"><i class="fas fa-clock text-danger me-2"></i>已过期 (1张)</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="coupon-card coupon-expired">
+                                <div class="coupon-corner corner-expired"></div>
+                                <div class="coupon-status status-expired">已过期</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4 text-center">
+                                            <div class="coupon-value">25%</div>
+                                            <div class="coupon-type">折扣券</div>
+                                        </div>
+                                        <div class="col-8">
+                                            <h6>夏季特惠折扣券</h6>
+                                            <p class="text-muted mb-2">已于2024-08-31过期</p>
+                                            <div class="coupon-code mb-2">SUMMER25</div>
+                                            <small class="text-danger">过期时间: 2024-08-31</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

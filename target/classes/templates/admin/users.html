@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 在线教育系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            background: white;
+            min-height: calc(100vh - 76px);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: #dc3545;
+        }
+        .sidebar .nav-link.active {
+            background-color: #dc3545;
+            color: white;
+        }
+        .main-content {
+            padding: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+        .admin-badge {
+            background: #dc3545;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .role-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        .role-teacher {
+            background-color: #28a745;
+            color: white;
+        }
+        .role-student {
+            background-color: #007bff;
+            color: white;
+        }
+        .status-active {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-inactive {
+            background-color: #6c757d;
+            color: white;
+        }
+        .status-banned {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/edu/admin/dashboard">
+                <i class="fas fa-shield-alt me-2"></i>管理后台
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield me-1"></i>
+                        <span th:text="${user != null ? user.realName : '管理员'}">管理员</span>
+                        <span class="admin-badge">ADMIN</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/edu/admin/profile">
+                            <i class="fas fa-user me-2"></i>管理员资料
+                        </a></li>
+                        <li><a class="dropdown-item" href="/edu/admin/settings">
+                            <i class="fas fa-cog me-2"></i>系统设置
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/edu/student/dashboard">
+                            <i class="fas fa-user me-2"></i>切换到学生视图
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/edu/auth/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3 col-lg-2 px-0">
+                <div class="sidebar">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" href="/edu/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>仪表板
+                        </a>
+                        <a class="nav-link active" href="/edu/admin/users">
+                            <i class="fas fa-users me-2"></i>用户管理
+                        </a>
+                        <a class="nav-link" href="/edu/admin/profile">
+                            <i class="fas fa-user me-2"></i>管理员资料
+                        </a>
+                        <a class="nav-link" href="/edu/admin/courses">
+                            <i class="fas fa-book me-2"></i>课程管理
+                        </a>
+                        <a class="nav-link" href="/edu/admin/orders">
+                            <i class="fas fa-shopping-cart me-2"></i>订单管理
+                        </a>
+                        <a class="nav-link" href="/edu/admin/coupons">
+                            <i class="fas fa-ticket-alt me-2"></i>优惠券管理
+                        </a>
+                        <a class="nav-link" href="/edu/admin/financial">
+                            <i class="fas fa-chart-line me-2"></i>财务报表
+                            <span class="admin-badge">机密</span>
+                        </a>
+                        <a class="nav-link" href="/edu/admin/system">
+                            <i class="fas fa-server me-2"></i>系统监控
+                            <span class="admin-badge">高危</span>
+                        </a>
+                        <a class="nav-link" href="/edu/admin/logs">
+                            <i class="fas fa-file-alt me-2"></i>系统日志
+                            <span class="admin-badge">敏感</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="col-md-9 col-lg-10">
+                <div class="main-content">
+                    <!-- 页面标题 -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-users me-2"></i>用户管理</h2>
+                        <div>
+                            <button class="btn btn-danger me-2">
+                                <i class="fas fa-plus me-1"></i>新增用户
+                            </button>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="/edu/admin/dashboard">仪表板</a></li>
+                                    <li class="breadcrumb-item active">用户管理</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- 统计信息 -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                                    <h4>1,234</h4>
+                                    <p class="text-muted">总用户数</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-user-graduate fa-2x text-info mb-3"></i>
+                                    <h4>1,156</h4>
+                                    <p class="text-muted">学生</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-chalkboard-teacher fa-2x text-success mb-3"></i>
+                                    <h4>45</h4>
+                                    <p class="text-muted">教师</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-user-shield fa-2x text-danger mb-3"></i>
+                                    <h4>3</h4>
+                                    <p class="text-muted">管理员</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户列表 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>用户列表
+                                </h5>
+                                <div class="d-flex">
+                                    <select class="form-select form-select-sm me-2" style="width: auto;">
+                                        <option>全部角色</option>
+                                        <option>学生</option>
+                                        <option>教师</option>
+                                        <option>管理员</option>
+                                    </select>
+                                    <select class="form-select form-select-sm me-2" style="width: auto;">
+                                        <option>全部状态</option>
+                                        <option>活跃</option>
+                                        <option>非活跃</option>
+                                        <option>已封禁</option>
+                                    </select>
+                                    <input type="text" class="form-control form-control-sm" placeholder="搜索用户..." style="width: 200px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>用户</th>
+                                            <th>邮箱</th>
+                                            <th>角色</th>
+                                            <th>状态</th>
+                                            <th>注册时间</th>
+                                            <th>最后登录</th>
+                                            <th>课程数/学习数</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://via.placeholder.com/40x40/007bff/ffffff?text=A" 
+                                                         class="user-avatar me-3">
+                                                    <div>
+                                                        <div class="fw-bold">管理员</div>
+                                                        <small class="text-muted">ID: 1</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>admin@example.com</td>
+                                            <td><span class="badge role-admin">管理员</span></td>
+                                            <td><span class="badge status-active">活跃</span></td>
+                                            <td>2024-01-01</td>
+                                            <td>2024-09-04 10:30</td>
+                                            <td>-</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" title="重置密码">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://via.placeholder.com/40x40/28a745/ffffff?text=张" 
+                                                         class="user-avatar me-3">
+                                                    <div>
+                                                        <div class="fw-bold">张老师</div>
+                                                        <small class="text-muted">ID: 2</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>teacher@example.com</td>
+                                            <td><span class="badge role-teacher">教师</span></td>
+                                            <td><span class="badge status-active">活跃</span></td>
+                                            <td>2024-02-15</td>
+                                            <td>2024-09-04 09:15</td>
+                                            <td>5门课程</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-success" title="查看课程">
+                                                        <i class="fas fa-book"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" title="重置密码">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://via.placeholder.com/40x40/007bff/ffffff?text=张" 
+                                                         class="user-avatar me-3">
+                                                    <div>
+                                                        <div class="fw-bold">张三</div>
+                                                        <small class="text-muted">ID: 3</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>zhang@example.com</td>
+                                            <td><span class="badge role-student">学生</span></td>
+                                            <td><span class="badge status-active">活跃</span></td>
+                                            <td>2024-03-10</td>
+                                            <td>2024-09-04 08:45</td>
+                                            <td>3门课程</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-info" title="学习记录">
+                                                        <i class="fas fa-chart-line"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" title="重置密码">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://via.placeholder.com/40x40/007bff/ffffff?text=李" 
+                                                         class="user-avatar me-3">
+                                                    <div>
+                                                        <div class="fw-bold">李四</div>
+                                                        <small class="text-muted">ID: 4</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>li@example.com</td>
+                                            <td><span class="badge role-student">学生</span></td>
+                                            <td><span class="badge status-inactive">非活跃</span></td>
+                                            <td>2024-04-20</td>
+                                            <td>2024-08-15 16:30</td>
+                                            <td>1门课程</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-success" title="激活用户">
+                                                        <i class="fas fa-user-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" title="重置密码">
+                                                        <i class="fas fa-key"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://via.placeholder.com/40x40/dc3545/ffffff?text=王" 
+                                                         class="user-avatar me-3">
+                                                    <div>
+                                                        <div class="fw-bold">王五</div>
+                                                        <small class="text-muted">ID: 5</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>wang@example.com</td>
+                                            <td><span class="badge role-student">学生</span></td>
+                                            <td><span class="badge status-banned">已封禁</span></td>
+                                            <td>2024-05-05</td>
+                                            <td>2024-07-20 14:20</td>
+                                            <td>0门课程</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" title="查看详情">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" title="编辑">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-success" title="解封用户">
+                                                        <i class="fas fa-unlock"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" title="删除用户">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <nav aria-label="用户分页">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1">上一页</a>
+                            </li>
+                            <li class="page-item active">
+                                <a class="page-link" href="#">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">3</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="#">下一页</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
