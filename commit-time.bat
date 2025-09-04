@@ -32,7 +32,7 @@ git add .
 git commit -m "%commit_message%"
 
 :: 推送到远程仓库
-git push %REMOTE_NAME% master
+git push %REMOTE_NAME% main
 
 echo 提交完成。
 pause
