@@ -2,8 +2,10 @@ package com.edu.controller;
 
 import com.edu.entity.User;
 import com.edu.entity.Course;
+import com.edu.entity.Order;
 import com.edu.service.UserService;
 import com.edu.service.CourseService;
+import com.edu.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +22,9 @@ public class PageController {
     
     @Autowired
     private CourseService courseService;
+    
+    @Autowired
+    private OrderService orderService;
     
     /**
      * 首页重定向到登录页面
@@ -160,7 +165,11 @@ public class PageController {
             return "redirect:/auth/login";
         }
         
+        // 获取用户的订单列表
+        List<Order> orders = orderService.findByUser(user);
+        
         model.addAttribute("user", user);
+        model.addAttribute("orders", orders);
         return "student/orders";
     }
     

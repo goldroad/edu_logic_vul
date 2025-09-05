@@ -143,4 +143,22 @@ public class OrderService {
     private String generateOrderNo() {
         return "ORD" + System.currentTimeMillis() + String.format("%04d", (int)(Math.random() * 10000));
     }
+    
+    public List<Order> findByUser(User user) {
+        return orderRepository.findByUser(user);
+    }
+    
+    public List<Order> findByUserId(Long userId) {
+        User user = new User();
+        user.setId(userId);
+        return orderRepository.findByUser(user);
+    }
+    
+    public List<Order> findByStatus(Order.OrderStatus status) {
+        return orderRepository.findByStatus(status);
+    }
+    
+    public Order save(Order order) {
+        return orderRepository.save(order);
+    }
 }
