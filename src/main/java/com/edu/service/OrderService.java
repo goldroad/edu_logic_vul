@@ -104,7 +104,7 @@ public class OrderService {
     }
     
     /**
-     * 支付订单
+     * 支付订单 - 支持抓包修改金额的漏洞版本
      */
     public boolean payOrder(String orderNo, Order.PaymentMethod paymentMethod) {
         Order order = orderRepository.findByOrderNo(orderNo);
@@ -116,17 +116,29 @@ public class OrderService {
             return false;
         }
         
+        // 重新获取最新的用户信息
+        User user = userService.findById(order.getUserId());
+        if (user == null) {
+            return false;
+        }
+        
         // 模拟支付逻辑
         if (paymentMethod == Order.PaymentMethod.BALANCE) {
-            User user = order.getUser();
-            if (user.getBalance() >= order.getFinalAmount().doubleValue()) {
-                user.setBalance(user.getBalance() - order.getFinalAmount().doubleValue());
+            // 漏洞：直接使用订单中的finalAmount，不验证是否被篡改
+            double paymentAmount = order.getFinalAmount().doubleValue();
+            
+            if (user.getBalance() >= paymentAmount) {
+                // 扣除用户余额
+                user.setBalance(user.getBalance() - paymentAmount);
                 userService.save(user);
                 
+                // 更新订单状态
                 order.setStatus(Order.OrderStatus.PAID);
                 order.setPaymentMethod(paymentMethod);
                 order.setPayTime(LocalDateTime.now());
                 order.setPaymentTransactionId(UUID.randomUUID().toString());
+                
+                // 确保订单数据更新到数据库
                 orderRepository.update(order);
                 
                 return true;
@@ -139,6 +151,8 @@ public class OrderService {
         order.setPaymentMethod(paymentMethod);
         order.setPayTime(LocalDateTime.now());
         order.setPaymentTransactionId(UUID.randomUUID().toString());
+        
+        // 确保订单数据更新到数据库
         orderRepository.update(order);
         
         return true;

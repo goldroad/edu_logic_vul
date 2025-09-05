@@ -258,7 +258,9 @@
                 return;
             }
             
-            const confirmMsg = `确认使用${getPaymentMethodName(selectedPaymentMethod)}支付 ¥${/*[[${order.finalAmount}]]*/ '199.00'} 吗？`;
+            // 获取当前页面显示的实际支付金额
+            const currentAmount = document.querySelector('.price-display span').textContent;
+            const confirmMsg = `确认使用${getPaymentMethodName(selectedPaymentMethod)}支付 ¥${currentAmount} 吗？`;
             if (!confirm(confirmMsg)) {
                 return;
             }
@@ -277,7 +279,8 @@
                 },
                 body: JSON.stringify({
                     orderNo: orderNo,
-                    paymentMethod: selectedPaymentMethod
+                    paymentMethod: selectedPaymentMethod,
+                    amount: document.querySelector('.price-display span').textContent
                 })
             })
             .then(response => response.json())

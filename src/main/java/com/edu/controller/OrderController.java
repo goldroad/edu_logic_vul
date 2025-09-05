@@ -177,6 +177,8 @@ public class OrderController {
         if (request.containsKey("finalAmount")) {
             BigDecimal newAmount = new BigDecimal(request.get("finalAmount").toString());
             order.setFinalAmount(newAmount);
+            // 直接保存修改后的金额，不重新计算
+            orderService.save(order);
         }
         
         if (request.containsKey("discountAmount")) {
@@ -189,12 +191,18 @@ public class OrderController {
             order.setShippingFee(shippingFee);
         }
         
-        // 重新计算最终金额（仍然存在漏洞）
-        BigDecimal finalAmount = order.getOriginalAmount()
-                .multiply(BigDecimal.valueOf(order.getQuantity()))
-                .subtract(order.getDiscountAmount())
-                .add(order.getShippingFee());
-        order.setFinalAmount(finalAmount);
+        // 如果只修改了finalAmount，直接使用修改后的值，不重新计算
+        if (request.containsKey("finalAmount") && request.size() == 1) {
+            // 直接使用客户端传来的金额
+        } else {
+            // 重新计算最终金额（仍然存在漏洞）
+            BigDecimal finalAmount = order.getOriginalAmount()
+                    .multiply(BigDecimal.valueOf(order.getQuantity()))
+                    .subtract(order.getDiscountAmount())
+                    .add(order.getShippingFee());
+            order.setFinalAmount(finalAmount);
+            orderService.save(order);
+        }
         
         response.put("success", true);
         response.put("message", "订单金额修改成功");

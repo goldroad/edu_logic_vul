@@ -33,6 +33,7 @@ com\edu\EduLogicVulApplication.class
 com\edu\controller\CaptchaController.class
 com\edu\controller\CouponController.class
 com\edu\entity\Order$PaymentMethod.class
+com\edu\controller\StudentController.class
 com\edu\controller\WebAuthController$1.class
 com\edu\entity\Course$CourseStatus.class
 com\edu\entity\User$Role.class
