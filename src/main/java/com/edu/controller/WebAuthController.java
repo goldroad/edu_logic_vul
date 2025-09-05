@@ -2,7 +2,7 @@ package com.edu.controller;
 
 import com.edu.entity.User;
 import com.edu.service.UserService;
-import com.edu.service.CaptchaService;
+import com.edu.service.SimpleCaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class WebAuthController {
     private UserService userService;
     
     @Autowired
-    private CaptchaService captchaService;
+    private SimpleCaptchaService simpleCaptchaService;
     
     /**
      * 用户登录处理 - 包含用户名枚举漏洞
@@ -35,15 +35,15 @@ public class WebAuthController {
                        RedirectAttributes redirectAttributes) {
         
         // 验证码验证（包含多个漏洞）
-        if (!captchaService.verifyCaptcha(session.getId(), captcha)) {
+        if (!simpleCaptchaService.verifyCaptcha(session.getId(), captcha)) {
             redirectAttributes.addFlashAttribute("error", "验证码错误");
             return "redirect:/auth/login";
         }
         
-        // 用户名枚举漏洞：明确提示用户名是否存在
-        Optional<User> userOpt = userService.findByUsername(username);
+        // 修复用户名枚举漏洞：使用统一的错误提示
+        Optional<User> userOpt = userService.findByUsernameOrEmailOrPhone(username);
         if (!userOpt.isPresent()) {
-            redirectAttributes.addFlashAttribute("error", "用户名不存在"); // 漏洞：泄露用户名存在性
+            redirectAttributes.addFlashAttribute("error", "用户名或密码错误");
             return "redirect:/auth/login";
         }
         
@@ -51,7 +51,7 @@ public class WebAuthController {
         
         // 密码验证
         if (!user.getPassword().equals(password)) {
-            redirectAttributes.addFlashAttribute("error", "密码错误");
+            redirectAttributes.addFlashAttribute("error", "用户名或密码错误");
             return "redirect:/auth/login";
         }
         
@@ -79,10 +79,11 @@ public class WebAuthController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> verifyIdentity(@RequestParam String username,
                                                             @RequestParam(required = false) String email,
-                                                            @RequestParam(required = false) String phone) {
+                                                            @RequestParam(required = false) String phone,
+                                                            HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
-        // 漏洞：只验证用户名存在，不验证邮箱和手机号是否匹配
+        // 修复：验证用户名和邮箱是否匹配
         Optional<User> userOpt = userService.findByUsername(username);
         if (!userOpt.isPresent()) {
             response.put("success", false);
@@ -90,7 +91,18 @@ public class WebAuthController {
             return ResponseEntity.ok(response);
         }
         
-        // 漏洞：不验证邮箱和手机号是否匹配，直接通过验证
+        User user = userOpt.get();
+        
+        // 验证邮箱是否匹配
+        if (email != null && !email.isEmpty() && !user.getEmail().equals(email)) {
+            response.put("success", false);
+            response.put("message", "邮箱与用户名不匹配");
+            return ResponseEntity.ok(response);
+        }
+        
+        // 身份验证成功，将用户名存储到会话中
+        session.setAttribute("verifiedUsername", username);
+        
         response.put("success", true);
         response.put("message", "身份验证成功");
         return ResponseEntity.ok(response);
@@ -103,6 +115,7 @@ public class WebAuthController {
     public String resetPassword(@RequestParam String username,
                                @RequestParam String newPassword,
                                @RequestParam String confirmNewPassword,
+                               HttpSession session,
                                RedirectAttributes redirectAttributes) {
         
         if (!newPassword.equals(confirmNewPassword)) {
@@ -110,7 +123,13 @@ public class WebAuthController {
             return "redirect:/auth/forgot-password";
         }
         
-        // 漏洞：任意账号密码重置
+        // 修复：验证会话中的用户名，防止抓包修改
+        String verifiedUsername = (String) session.getAttribute("verifiedUsername");
+        if (verifiedUsername == null || !verifiedUsername.equals(username)) {
+            redirectAttributes.addFlashAttribute("error", "身份验证已过期，请重新验证");
+            return "redirect:/auth/forgot-password";
+        }
+        
         Optional<User> userOpt = userService.findByUsername(username);
         if (!userOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "用户不存在");
@@ -120,6 +139,9 @@ public class WebAuthController {
         User user = userOpt.get();
         user.setPassword(newPassword);
         userService.save(user);
+        
+        // 清除会话中的验证信息
+        session.removeAttribute("verifiedUsername");
         
         redirectAttributes.addFlashAttribute("success", "密码重置成功，请使用新密码登录");
         return "redirect:/auth/login";

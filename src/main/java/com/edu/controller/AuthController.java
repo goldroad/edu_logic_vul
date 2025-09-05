@@ -1,8 +1,7 @@
 package com.edu.controller;
 
-import com.edu.entity.Captcha;
 import com.edu.entity.User;
-import com.edu.service.CaptchaService;
+import com.edu.service.SimpleCaptchaService;
 import com.edu.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ public class AuthController {
     private UserService userService;
     
     @Autowired
-    private CaptchaService captchaService;
+    private SimpleCaptchaService simpleCaptchaService;
     
     /**
      * 登录接口
@@ -33,7 +32,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         
         // 验证码验证
-        if (!captchaService.verifyCaptcha(session.getId(), captcha)) {
+        if (!simpleCaptchaService.verifyCaptcha(session.getId(), captcha)) {
             response.put("success", false);
             response.put("message", "验证码错误");
             return response;
@@ -108,52 +107,18 @@ public class AuthController {
     public Map<String, Object> getCaptcha(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
-        Captcha captcha = captchaService.generateImageCaptcha(session.getId());
+        String code = simpleCaptchaService.generateCaptcha(session.getId());
         
         response.put("success", true);
         response.put("sessionId", session.getId());
-        response.put("code", captcha.getCode());
-        response.put("hiddenCode", captcha.getCode());
+        response.put("hiddenCode", code); // 隐藏字段中的验证码
         
         return response;
     }
     
-    /**
-     * 发送短信验证码
-     */
-    @PostMapping("/send-sms")
-    public Map<String, Object> sendSms(@RequestBody Map<String, String> request) {
-        String phone = request.get("phone");
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        Captcha captcha = captchaService.sendSmsCode(phone);
-        
-        response.put("success", true);
-        response.put("message", "短信验证码已发送");
-        // 返回验证码
-        response.put("code", captcha.getCode());
-        
-        return response;
-    }
+
     
-    /**
-     * 验证短信验证码
-     */
-    @PostMapping("/verify-sms")
-    public Map<String, Object> verifySms(@RequestBody Map<String, String> request) {
-        String phone = request.get("phone");
-        String code = request.get("code");
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        boolean valid = captchaService.verifySmsCode(phone, code);
-        
-        response.put("success", valid);
-        response.put("message", valid ? "验证成功" : "验证码错误或已过期");
-        
-        return response;
-    }
+
     
     /**
      * 登出

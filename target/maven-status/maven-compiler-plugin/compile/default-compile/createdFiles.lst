@@ -3,6 +3,7 @@ com\edu\controller\AuthController.class
 com\edu\controller\CourseController.class
 com\edu\entity\UserCoupon$CouponStatus.class
 com\edu\service\FileService.class
+com\edu\service\SimpleCaptchaService.class
 com\edu\controller\WebAuthController.class
 com\edu\controller\PageController.class
 com\edu\config\DataInitializer.class
@@ -27,7 +28,9 @@ com\edu\service\CaptchaService.class
 com\edu\entity\Order$OrderStatus.class
 com\edu\entity\Coupon$CouponType.class
 com\edu\entity\Captcha$CaptchaType.class
+com\edu\service\SimpleCaptchaService$CaptchaData.class
 com\edu\EduLogicVulApplication.class
+com\edu\controller\CaptchaController.class
 com\edu\controller\CouponController.class
 com\edu\entity\Order$PaymentMethod.class
 com\edu\controller\WebAuthController$1.class

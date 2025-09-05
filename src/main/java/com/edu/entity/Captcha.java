@@ -26,7 +26,8 @@ public class Captcha {
     @Enumerated(EnumType.STRING)
     private CaptchaType type;
     
-    private String target; // 手机号或邮箱
+    @Column(length = 10000)
+    private String target; // 手机号或邮箱或图片数据
     
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0")
     private Boolean used = false;
