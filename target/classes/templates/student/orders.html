@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -47,6 +47,13 @@
             border-radius: 15px 15px 0 0 !important;
             padding: 1.5rem;
         }
+        .order-card {
+            transition: transform 0.3s;
+            margin-bottom: 1rem;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+        }
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -56,53 +63,21 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .order-card {
-            border: 1px solid #e9ecef;
+        .filter-tabs {
+            background: white;
             border-radius: 10px;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        .order-card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        .order-status {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
+        .filter-tabs .nav-link {
+            border: none;
+            color: #6c757d;
             font-weight: 500;
         }
-        .status-paid {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .status-cancelled {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .status-refunded {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-        .course-image {
-            width: 80px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .price {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #dc3545;
-        }
-        .original-price {
-            text-decoration: line-through;
-            color: #6c757d;
-            font-size: 0.9rem;
+        .filter-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
     </style>
 </head>
@@ -118,7 +93,7 @@
                 <div class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user me-1"></i>
-                        <span th:text="${user != null ? user.realName : '学生'}">学生</span>
+                        <span th:text="${user.realName}">学生姓名</span>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/edu/student/profile">
@@ -144,22 +119,22 @@
                 <div class="sidebar">
                     <nav class="nav flex-column">
                         <a class="nav-link" href="/edu/student/dashboard">
-                            <i class="fas fa-tachometer-alt me-2"></i>学习中心
+                            <i class="fas fa-tachometer-alt me-2"></i>仪表板
                         </a>
                         <a class="nav-link" href="/edu/student/courses">
                             <i class="fas fa-book me-2"></i>我的课程
                         </a>
                         <a class="nav-link active" href="/edu/student/orders">
-                            <i class="fas fa-shopping-cart me-2"></i>我的订单
+                            <i class="fas fa-shopping-cart me-2"></i>订单管理
                         </a>
                         <a class="nav-link" href="/edu/student/coupons">
                             <i class="fas fa-ticket-alt me-2"></i>优惠券
                         </a>
-                        <a class="nav-link" href="/edu/student/files">
-                            <i class="fas fa-folder me-2"></i>学习资料
-                        </a>
                         <a class="nav-link" href="/edu/student/profile">
                             <i class="fas fa-user me-2"></i>个人资料
+                        </a>
+                        <a class="nav-link" href="/edu/student/files">
+                            <i class="fas fa-file me-2"></i>文件管理
                         </a>
                     </nav>
                 </div>
@@ -171,197 +146,182 @@
                     <!-- 页面标题 -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h2><i class="fas fa-shopping-cart me-2"></i>我的订单</h2>
-                        <nav aria-label="breadcrumb">
-                            <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="/edu/student/dashboard">学习中心</a></li>
-                                <li class="breadcrumb-item active">我的订单</li>
-                            </ol>
-                        </nav>
+                        <a href="/edu/student/dashboard" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>继续购买
+                        </a>
                     </div>
 
                     <!-- 订单筛选 -->
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option>全部订单</option>
-                                        <option>待支付</option>
-                                        <option>已支付</option>
-                                        <option>已取消</option>
-                                        <option>已退款</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option>最近30天</option>
-                                        <option>最近3个月</option>
-                                        <option>最近6个月</option>
-                                        <option>最近1年</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text" class="form-control" placeholder="搜索课程名称或订单号...">
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-primary w-100">
-                                        <i class="fas fa-search me-1"></i>搜索
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="filter-tabs">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="filterOrders('ALL')">
+                                    <i class="fas fa-list me-2"></i>全部订单
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterOrders('PENDING')">
+                                    <i class="fas fa-clock me-2"></i>待支付
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterOrders('PAID')">
+                                    <i class="fas fa-check-circle me-2"></i>已完成
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="filterOrders('CANCELLED')">
+                                    <i class="fas fa-times-circle me-2"></i>已取消
+                                </a>
+                            </li>
+                        </ul>
                     </div>
 
                     <!-- 订单列表 -->
-                    <div class="order-card">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>订单列表
+                            </h5>
+                        </div>
                         <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <img src="https://via.placeholder.com/80x60/667eea/ffffff?text=Java" alt="课程封面" class="course-image">
+                            <!-- 订单列表 -->
+                            <div class="row" id="ordersList">
+                                <div class="col-12" th:each="order : ${orders}">
+                                    <div class="card order-card" th:data-status="${order.status}">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-2">
+                                                    <img src="https://via.placeholder.com/120x80" class="img-fluid rounded" alt="课程封面">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 th:text="${order.course.title}">课程标题</h6>
+                                                    <p class="text-muted mb-1">订单号：<span th:text="${order.orderNo}">ORD123456789</span></p>
+                                                    <small class="text-muted">下单时间：<span th:text="${#temporals.format(order.createTime, 'yyyy-MM-dd HH:mm:ss')}">2024-09-05 10:30:00</span></small>
+                                                </div>
+                                                <div class="col-md-2 text-center">
+                                                    <span th:class="'badge ' + ${order.status == 'PAID' ? 'bg-success' : (order.status == 'PENDING' ? 'bg-warning' : (order.status == 'CANCELLED' ? 'bg-danger' : 'bg-info'))}"
+                                                          th:text="${order.status == 'PAID' ? '已完成' : (order.status == 'PENDING' ? '待支付' : (order.status == 'CANCELLED' ? '已取消' : '处理中'))}">
+                                                        订单状态
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-2 text-center">
+                                                    <span class="h5 text-danger">¥<span th:text="${order.finalAmount}">199.00</span></span>
+                                                    <br>
+                                                    <small class="text-muted" th:if="${order.originalAmount != order.finalAmount}">
+                                                        原价：¥<span th:text="${order.originalAmount}">299.00</span>
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-2 text-end">
+                                                    <div th:if="${order.status == 'PENDING'}">
+                                                        <a th:href="@{'/edu/student/payment/' + ${order.orderNo}}" class="btn btn-success btn-sm me-2">立即支付</a>
+                                                        <button class="btn btn-outline-secondary btn-sm" th:onclick="'cancelOrder(\'' + ${order.orderNo} + '\')'">取消订单</button>
+                                                    </div>
+                                                    <div th:if="${order.status == 'PAID'}">
+                                                        <button class="btn btn-primary btn-sm me-2">继续学习</button>
+                                                        <button class="btn btn-outline-primary btn-sm" th:onclick="'viewOrderDetail(\'' + ${order.orderNo} + '\')'">查看详情</button>
+                                                    </div>
+                                                    <div th:if="${order.status == 'CANCELLED'}">
+                                                        <button class="btn btn-outline-primary btn-sm" th:onclick="'reorder(' + ${order.course.id} + ')'">再次购买</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <h6 class="mb-1">Java从入门到精通</h6>
-                                    <small class="text-muted">订单号: ORD20240904001</small><br>
-                                    <small class="text-muted">下单时间: 2024-09-04 10:30:15</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="price">¥149.00</div>
-                                    <div class="original-price">¥299.00</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <span class="order-status status-paid">已支付</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-outline-primary btn-sm me-2">查看详情</button>
-                                    <button class="btn btn-primary btn-sm">开始学习</button>
+                                
+                                <!-- 空状态 -->
+                                <div class="col-12" th:if="${#lists.isEmpty(orders)}" id="emptyState">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">暂无订单</h5>
+                                        <p class="text-muted">您还没有购买任何课程</p>
+                                        <a href="/edu/student/dashboard" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>去购买课程
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="order-card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <img src="https://via.placeholder.com/80x60/764ba2/ffffff?text=Python" alt="课程封面" class="course-image">
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="mb-1">Python数据分析实战</h6>
-                                    <small class="text-muted">订单号: ORD20240903002</small><br>
-                                    <small class="text-muted">下单时间: 2024-09-03 15:20:30</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="price">¥199.00</div>
-                                    <div class="original-price">¥399.00</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <span class="order-status status-pending">待支付</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-outline-primary btn-sm me-2">查看详情</button>
-                                    <button class="btn btn-success btn-sm">立即支付</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <img src="https://via.placeholder.com/80x60/28a745/ffffff?text=Spring" alt="课程封面" class="course-image">
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="mb-1">Spring Boot微服务架构</h6>
-                                    <small class="text-muted">订单号: ORD20240902003</small><br>
-                                    <small class="text-muted">下单时间: 2024-09-02 09:15:45</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="price">¥299.00</div>
-                                    <div class="original-price">¥599.00</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <span class="order-status status-paid">已支付</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-outline-primary btn-sm me-2">查看详情</button>
-                                    <button class="btn btn-primary btn-sm">继续学习</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <img src="https://via.placeholder.com/80x60/dc3545/ffffff?text=Vue" alt="课程封面" class="course-image">
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="mb-1">Vue.js前端开发实战</h6>
-                                    <small class="text-muted">订单号: ORD20240901004</small><br>
-                                    <small class="text-muted">下单时间: 2024-09-01 14:25:10</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="price">¥179.00</div>
-                                    <div class="original-price">¥359.00</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <span class="order-status status-cancelled">已取消</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-outline-primary btn-sm me-2">查看详情</button>
-                                    <button class="btn btn-outline-secondary btn-sm">重新购买</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-1">
-                                    <img src="https://via.placeholder.com/80x60/ffc107/ffffff?text=React" alt="课程封面" class="course-image">
-                                </div>
-                                <div class="col-md-4">
-                                    <h6 class="mb-1">React全栈开发教程</h6>
-                                    <small class="text-muted">订单号: ORD20240831005</small><br>
-                                    <small class="text-muted">下单时间: 2024-08-31 16:40:20</small>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="price">¥249.00</div>
-                                    <div class="original-price">¥499.00</div>
-                                </div>
-                                <div class="col-md-2">
-                                    <span class="order-status status-refunded">已退款</span>
-                                </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-outline-primary btn-sm me-2">查看详情</button>
-                                    <button class="btn btn-outline-secondary btn-sm">重新购买</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 分页 -->
-                    <nav aria-label="订单分页">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1">上一页</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">下一页</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="/edu/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 筛选订单
+        function filterOrders(status) {
+            const orderCards = document.querySelectorAll('.order-card');
+            const navLinks = document.querySelectorAll('.filter-tabs .nav-link');
+            
+            // 更新导航状态
+            navLinks.forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 筛选订单
+            let visibleCount = 0;
+            orderCards.forEach(card => {
+                if (status === 'ALL' || card.dataset.status === status) {
+                    card.parentElement.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.parentElement.style.display = 'none';
+                }
+            });
+            
+            // 显示/隐藏空状态
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) {
+                emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+        
+        // 取消订单
+        function cancelOrder(orderNo) {
+            if (!confirm('确认取消此订单吗？')) {
+                return;
+            }
+            
+            fetch('/edu/student/cancel-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ orderNo: orderNo })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('订单已取消');
+                    location.reload();
+                } else {
+                    alert('取消订单失败：' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('取消订单过程中发生错误');
+            });
+        }
+        
+        // 查看订单详情
+        function viewOrderDetail(orderNo) {
+            window.open(`/edu/student/order-detail/${orderNo}`, '_blank');
+        }
+        
+        // 再次购买
+        function reorder(courseId) {
+            if (confirm('确认再次购买此课程吗？')) {
+                window.location.href = `/edu/student/dashboard?courseId=${courseId}`;
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('订单页面加载完成');
+        });
+    </script>
 </body>
 </html>

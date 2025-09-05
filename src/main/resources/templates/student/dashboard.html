@@ -131,23 +131,18 @@
                         </a>
                         <a class="nav-link" href="/edu/student/orders">
                             <i class="fas fa-shopping-cart me-2"></i>订单管理
-
                         </a>
                         <a class="nav-link" href="/edu/student/coupons">
                             <i class="fas fa-ticket-alt me-2"></i>优惠券
-
                         </a>
                         <a class="nav-link" href="/edu/student/profile">
                             <i class="fas fa-user me-2"></i>个人资料
-
                         </a>
                         <a class="nav-link" href="/edu/student/files">
                             <i class="fas fa-file me-2"></i>文件管理
-
                         </a>
                         <a class="nav-link" href="/edu/admin/dashboard" onclick="return testVerticalEscalation()">
                             <i class="fas fa-shield-alt me-2"></i>管理后台
-
                         </a>
                     </nav>
                 </div>
@@ -258,64 +253,76 @@
 
     <script src="/edu/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 购买课程（包含支付漏洞）
+        // 购买课程 - 直接创建订单并跳转支付页面
         function buyCourse(button) {
             const courseId = button.getAttribute('data-course-id');
             const originalPrice = button.getAttribute('data-course-price');
             
-            // 弹出购买对话框
-            const newPrice = prompt(`课程原价：¥${originalPrice}\n请输入您想支付的价格:`, originalPrice);
-            if (newPrice === null) return;
+            // 确认购买
+            if (!confirm(`确认购买此课程吗？ \n 课程价格：¥${originalPrice}`)) {
+                return;
+            }
             
-            const quantity = prompt('请输入购买数量（可输入负数）:', '1');
-            if (quantity === null) return;
+            // 显示加载状态
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>处理中...';
+            button.disabled = true;
             
-            const discount = prompt('请输入折扣率（0-1之间，如0.1表示1折）:', '0.1');
-            if (discount === null) return;
-            
-            // 发送购买请求
-            fetch('/edu/student/buy-course', {
+            // 发送购买请求，创建订单（包含数量和折扣参数供抓包测试）
+            fetch('/edu/student/create-order', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     courseId: courseId,
-                    price: parseFloat(newPrice),
-                    quantity: parseInt(quantity),
-                    discount: parseFloat(discount),
-                    shipping: -10 // 负运费
+                    quantity: 1,        // 默认数量为1（攻击者可通过抓包修改）
+                    discount: 1.0       // 默认折扣为1.0，即100%（攻击者可通过抓包修改为0.1等）
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                // 先检查HTTP状态码
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('服务器响应:', data);
                 if (data.success) {
-                    alert(`购买成功！实际支付：¥${data.actualAmount}`);
-                    location.reload();
+                    // 跳转到支付页面
+                    window.location.href = `/edu/student/payment/${data.orderNo}`;
                 } else {
-                    alert('购买失败：' + data.message);
+                    // 显示详细的错误信息
+                    let errorMsg = '订单创建失败';
+                    if (data.message) {
+                        errorMsg += '：' + data.message;
+                    }
+                    if (data.error) {
+                        errorMsg += '\\n错误详情：' + data.error;
+                    }
+                    if (data.code) {
+                        errorMsg += '\\n错误代码：' + data.code;
+                    }
+                    if (data.details) {
+                        errorMsg += '\\n详细信息：' + JSON.stringify(data.details);
+                    }
+                    alert(errorMsg);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('购买过程中发生错误');
+                console.error('请求错误:', error);
+                let errorMsg = '创建订单过程中发生错误';
+                if (error.message) {
+                    errorMsg += '：' + error.message;
+                }
+                alert(errorMsg);
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                button.innerHTML = originalText;
+                button.disabled = false;
             });
-        }
-        
-        // 水平越权：查看其他用户资料
-        function viewOtherUserProfile() {
-            const userId = document.getElementById('userIdInput').value;
-            window.open(`/edu/student/profile?id=${userId}`, '_blank');
-        }
-        
-        // 垂直越权：访问管理后台
-        function accessAdminPanel() {
-            window.open('/edu/admin/dashboard?role=ADMIN', '_blank');
-        }
-        
-        // 垂直越权：查看所有用户
-        function viewAllUsers() {
-            window.open('/edu/api/users?role=ADMIN', '_blank');
         }
         
         // 垂直越权测试
@@ -324,45 +331,8 @@
             return confirmed;
         }
         
-        // 任意文件读取
-        function readFile() {
-            const filePath = document.getElementById('filePathInput').value;
-            window.open(`/edu/api/file/read?path=${encodeURIComponent(filePath)}`, '_blank');
-        }
-        
-        // 并发优惠券领取测试
-        function concurrentCouponClaim() {
-            const couponId = 3; // 并发测试券ID
-            const promises = [];
-            
-            // 同时发送10个请求
-            for (let i = 0; i < 10; i++) {
-                promises.push(
-                    fetch('/edu/student/claim-coupon', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ couponId: couponId })
-                    })
-                );
-            }
-            
-            Promise.all(promises)
-                .then(responses => Promise.all(responses.map(r => r.json())))
-                .then(results => {
-                    const successCount = results.filter(r => r.success).length;
-                    alert(`并发测试完成！成功领取 ${successCount} 张优惠券（正常情况下应该只能领取1张）`);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('并发测试过程中发生错误');
-                });
-        }
-        
         // 页面加载完成后的初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 可以在这里添加页面初始化逻辑
             console.log('学生仪表板加载完成');
         });
     </script>
