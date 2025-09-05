@@ -90,7 +90,8 @@ public class PageController {
         User targetUser;
         if (id != null) {
             // 获取目标用户资料
-            targetUser = userService.findById(id).orElse(currentUser);
+            User foundUser = userService.findById(id);
+            targetUser = foundUser != null ? foundUser : currentUser;
         } else {
             targetUser = currentUser;
         }

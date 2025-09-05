@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,11 +30,19 @@ public class OrderService {
     public Order createOrder(Long userId, Long courseId, BigDecimal clientPrice, 
                            Integer quantity, BigDecimal discount, BigDecimal shippingFee) {
         
-        User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
-        Course course = courseService.findById(courseId).orElseThrow(() -> new RuntimeException("课程不存在"));
+        User user = userService.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        Course course = courseService.findById(courseId);
+        if (course == null) {
+            throw new RuntimeException("课程不存在");
+        }
         
         Order order = new Order();
         order.setOrderNo(generateOrderNo());
+        order.setUserId(user.getId());
+        order.setCourseId(course.getId());
         order.setUser(user);
         order.setCourse(course);
         
@@ -61,18 +68,27 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.PENDING);
         order.setCreateTime(LocalDateTime.now());
         
-        return orderRepository.save(order);
+        orderRepository.save(order);
+        return order;
     }
     
     /**
      * 正确的订单创建方法（用于对比）
      */
     public Order createOrderSecure(Long userId, Long courseId) {
-        User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("用户不存在"));
-        Course course = courseService.findById(courseId).orElseThrow(() -> new RuntimeException("课程不存在"));
+        User user = userService.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        Course course = courseService.findById(courseId);
+        if (course == null) {
+            throw new RuntimeException("课程不存在");
+        }
         
         Order order = new Order();
         order.setOrderNo(generateOrderNo());
+        order.setUserId(user.getId());
+        order.setCourseId(course.getId());
         order.setUser(user);
         order.setCourse(course);
         order.setOriginalAmount(course.getPrice()); // 使用服务端价格
@@ -83,19 +99,19 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.PENDING);
         order.setCreateTime(LocalDateTime.now());
         
-        return orderRepository.save(order);
+        orderRepository.save(order);
+        return order;
     }
     
     /**
      * 支付订单
      */
     public boolean payOrder(String orderNo, Order.PaymentMethod paymentMethod) {
-        Optional<Order> orderOpt = orderRepository.findByOrderNo(orderNo);
-        if (!orderOpt.isPresent()) {
+        Order order = orderRepository.findByOrderNo(orderNo);
+        if (order == null) {
             return false;
         }
         
-        Order order = orderOpt.get();
         if (order.getStatus() != Order.OrderStatus.PENDING) {
             return false;
         }
@@ -111,7 +127,7 @@ public class OrderService {
                 order.setPaymentMethod(paymentMethod);
                 order.setPayTime(LocalDateTime.now());
                 order.setPaymentTransactionId(UUID.randomUUID().toString());
-                orderRepository.save(order);
+                orderRepository.update(order);
                 
                 return true;
             }
@@ -123,16 +139,16 @@ public class OrderService {
         order.setPaymentMethod(paymentMethod);
         order.setPayTime(LocalDateTime.now());
         order.setPaymentTransactionId(UUID.randomUUID().toString());
-        orderRepository.save(order);
+        orderRepository.update(order);
         
         return true;
     }
     
     public List<Order> getOrdersByUser(User user) {
-        return orderRepository.findByUser(user);
+        return orderRepository.findByUserId(user.getId());
     }
     
-    public Optional<Order> findByOrderNo(String orderNo) {
+    public Order findByOrderNo(String orderNo) {
         return orderRepository.findByOrderNo(orderNo);
     }
     
@@ -145,20 +161,23 @@ public class OrderService {
     }
     
     public List<Order> findByUser(User user) {
-        return orderRepository.findByUser(user);
+        return orderRepository.findByUserId(user.getId());
     }
     
     public List<Order> findByUserId(Long userId) {
-        User user = new User();
-        user.setId(userId);
-        return orderRepository.findByUser(user);
+        return orderRepository.findByUserId(userId);
     }
     
     public List<Order> findByStatus(Order.OrderStatus status) {
-        return orderRepository.findByStatus(status);
+        return orderRepository.findByStatus(status.name());
     }
     
     public Order save(Order order) {
-        return orderRepository.save(order);
+        if (order.getId() == null) {
+            orderRepository.save(order);
+        } else {
+            orderRepository.update(order);
+        }
+        return order;
     }
 }

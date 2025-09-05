@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CouponService {
@@ -41,19 +40,18 @@ public class CouponService {
         coupon.setEnabled(true);
         coupon.setCreateTime(LocalDateTime.now());
         
-        return couponRepository.save(coupon);
+        couponRepository.save(coupon);
+        return coupon;
     }
     
     /**
      * 领取优惠券
      */
     public boolean receiveCoupon(Long couponId, User user) {
-        Optional<Coupon> couponOpt = couponRepository.findById(couponId);
-        if (!couponOpt.isPresent()) {
+        Coupon coupon = couponRepository.findById(couponId);
+        if (coupon == null) {
             return false;
         }
-        
-        Coupon coupon = couponOpt.get();
         
         // 检查优惠券是否有效
         LocalDateTime now = LocalDateTime.now();
@@ -64,7 +62,7 @@ public class CouponService {
         }
         
         // 检查用户是否已经领取过
-        if (userCouponRepository.existsByUserAndCoupon(user, coupon)) {
+        if (userCouponRepository.existsByUserIdAndCouponId(user.getId(), coupon.getId())) {
             return false;
         }
         
@@ -82,6 +80,8 @@ public class CouponService {
         
         // 创建用户优惠券记录
         UserCoupon userCoupon = new UserCoupon();
+        userCoupon.setUserId(user.getId());
+        userCoupon.setCouponId(coupon.getId());
         userCoupon.setUser(user);
         userCoupon.setCoupon(coupon);
         userCoupon.setStatus(UserCoupon.CouponStatus.UNUSED);
@@ -90,7 +90,7 @@ public class CouponService {
         
         // 更新已使用数量
         coupon.setUsedCount(coupon.getUsedCount() + 1);
-        couponRepository.save(coupon);
+        couponRepository.update(coupon);
         
         return true;
     }
@@ -99,12 +99,10 @@ public class CouponService {
      * 安全的领取优惠券方法（使用synchronized）
      */
     public synchronized boolean receiveCouponSafe(Long couponId, User user) {
-        Optional<Coupon> couponOpt = couponRepository.findById(couponId);
-        if (!couponOpt.isPresent()) {
+        Coupon coupon = couponRepository.findById(couponId);
+        if (coupon == null) {
             return false;
         }
-        
-        Coupon coupon = couponOpt.get();
         
         // 检查优惠券是否有效
         LocalDateTime now = LocalDateTime.now();
@@ -115,7 +113,7 @@ public class CouponService {
         }
         
         // 检查用户是否已经领取过
-        if (userCouponRepository.existsByUserAndCoupon(user, coupon)) {
+        if (userCouponRepository.existsByUserIdAndCouponId(user.getId(), coupon.getId())) {
             return false;
         }
         
@@ -126,6 +124,8 @@ public class CouponService {
         
         // 创建用户优惠券记录
         UserCoupon userCoupon = new UserCoupon();
+        userCoupon.setUserId(user.getId());
+        userCoupon.setCouponId(coupon.getId());
         userCoupon.setUser(user);
         userCoupon.setCoupon(coupon);
         userCoupon.setStatus(UserCoupon.CouponStatus.UNUSED);
@@ -134,7 +134,7 @@ public class CouponService {
         
         // 更新已使用数量
         coupon.setUsedCount(coupon.getUsedCount() + 1);
-        couponRepository.save(coupon);
+        couponRepository.update(coupon);
         
         return true;
     }
@@ -150,17 +150,17 @@ public class CouponService {
      * 获取用户的优惠券
      */
     public List<UserCoupon> getUserCoupons(User user) {
-        return userCouponRepository.findByUser(user);
+        return userCouponRepository.findByUserId(user.getId());
     }
     
     /**
      * 获取用户未使用的优惠券
      */
     public List<UserCoupon> getUserUnusedCoupons(User user) {
-        return userCouponRepository.findByUserAndStatus(user, UserCoupon.CouponStatus.UNUSED);
+        return userCouponRepository.findByUserIdAndStatus(user.getId(), "UNUSED");
     }
     
-    public Optional<Coupon> findById(Long id) {
+    public Coupon findById(Long id) {
         return couponRepository.findById(id);
     }
     
@@ -168,7 +168,7 @@ public class CouponService {
         return couponRepository.findAll();
     }
     
-    public Optional<Coupon> findByCode(String code) {
+    public Coupon findByCode(String code) {
         return couponRepository.findByCode(code);
     }
 }

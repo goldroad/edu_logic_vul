@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -28,9 +27,10 @@ public class CaptchaService {
      */
     public Captcha generateImageCaptcha(String sessionId) {
         // 先删除旧的验证码
-        captchaRepository.findBySessionIdAndUsedFalse(sessionId).ifPresent(oldCaptcha -> {
-            captchaRepository.delete(oldCaptcha);
-        });
+        Captcha oldCaptcha = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
+        if (oldCaptcha != null) {
+            captchaRepository.deleteById(oldCaptcha.getId());
+        }
         
         String code = generateRandomCode(4);
         
@@ -41,16 +41,17 @@ public class CaptchaService {
         captcha.setCreateTime(LocalDateTime.now());
         captcha.setExpireTime(LocalDateTime.now().plusMinutes(5));
         
-        return captchaRepository.save(captcha);
+        captchaRepository.save(captcha);
+        return captcha;
     }
     
     /**
      * 生成验证码图片（不存储到数据库）
      */
     public String generateCaptchaImageForSession(String sessionId) {
-        Optional<Captcha> captchaOpt = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
-        if (captchaOpt.isPresent()) {
-            return generateCaptchaImage(captchaOpt.get().getCode());
+        Captcha captcha = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
+        if (captcha != null) {
+            return generateCaptchaImage(captcha.getCode());
         }
         return "";
     }
@@ -120,12 +121,10 @@ public class CaptchaService {
         }
         
         try {
-            Optional<Captcha> captchaOpt = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
-            if (!captchaOpt.isPresent()) {
+            Captcha captcha = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
+            if (captcha == null) {
                 return false;
             }
-            
-            Captcha captcha = captchaOpt.get();
             
             // 检查是否过期
             if (captcha.getExpireTime().isBefore(LocalDateTime.now())) {
@@ -135,7 +134,7 @@ public class CaptchaService {
             // 验证码匹配
             if (captcha.getCode().equalsIgnoreCase(inputCode)) {
                 captcha.setUsed(true);
-                captchaRepository.save(captcha);
+                captchaRepository.update(captcha);
                 return true;
             }
             
@@ -150,9 +149,9 @@ public class CaptchaService {
      * 获取验证码
      */
     public String getCaptchaCode(String sessionId) {
-        Optional<Captcha> captchaOpt = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
-        if (captchaOpt.isPresent()) {
-            return captchaOpt.get().getCode();
+        Captcha captcha = captchaRepository.findBySessionIdAndUsedFalse(sessionId);
+        if (captcha != null) {
+            return captcha.getCode();
         }
         return null;
     }
@@ -174,7 +173,8 @@ public class CaptchaService {
         // 模拟发送短信
         System.out.println("发送短信验证码到 " + phone + ": " + code);
         
-        return captchaRepository.save(captcha);
+        captchaRepository.save(captcha);
+        return captcha;
     }
     
     /**
@@ -185,12 +185,11 @@ public class CaptchaService {
             return true;
         }
         
-        Optional<Captcha> captchaOpt = captchaRepository.findBySessionIdAndCodeAndUsedFalse(phone, code);
-        if (captchaOpt.isPresent()) {
-            Captcha captcha = captchaOpt.get();
+        Captcha captcha = captchaRepository.findBySessionIdAndCodeAndUsedFalse(phone, code);
+        if (captcha != null) {
             if (captcha.getExpireTime().isAfter(LocalDateTime.now())) {
                 captcha.setUsed(true);
-                captchaRepository.save(captcha);
+                captchaRepository.update(captcha);
                 return true;
             }
         }

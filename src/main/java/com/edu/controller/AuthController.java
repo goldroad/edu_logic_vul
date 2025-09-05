@@ -42,7 +42,7 @@ public class AuthController {
         String result = userService.login(username, password);
         
         if ("登录成功".equals(result)) {
-            User user = userService.findByUsernameOrEmailOrPhone(username).orElse(null);
+            User user = userService.findByUsernameOrEmailOrPhone(username);
             session.setAttribute("user", user);
             response.put("success", true);
             response.put("message", result);

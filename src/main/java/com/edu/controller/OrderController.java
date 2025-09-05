@@ -122,7 +122,7 @@ public class OrderController {
         Map<String, Object> response = new HashMap<>();
         
         // 漏洞：不验证订单是否属于当前用户
-        Order order = orderService.findByOrderNo(orderNo).orElse(null);
+        Order order = orderService.findByOrderNo(orderNo);
         
         if (order != null) {
             response.put("success", true);
@@ -161,7 +161,7 @@ public class OrderController {
         Map<String, Object> response = new HashMap<>();
         
         // 漏洞：允许修改订单金额
-        Order order = orderService.findByOrderNo(orderNo).orElse(null);
+        Order order = orderService.findByOrderNo(orderNo);
         if (order == null) {
             response.put("success", false);
             response.put("message", "订单不存在");

@@ -41,13 +41,11 @@ public class WebAuthController {
         }
         
         // 修复用户名枚举漏洞：使用统一的错误提示
-        Optional<User> userOpt = userService.findByUsernameOrEmailOrPhone(username);
-        if (!userOpt.isPresent()) {
+        User user = userService.findByUsernameOrEmailOrPhone(username);
+        if (user == null) {
             redirectAttributes.addFlashAttribute("error", "用户名或密码错误");
             return "redirect:/auth/login";
         }
-        
-        User user = userOpt.get();
         
         // 密码验证
         if (!user.getPassword().equals(password)) {
@@ -84,14 +82,12 @@ public class WebAuthController {
         Map<String, Object> response = new HashMap<>();
         
         // 修复：验证用户名和邮箱是否匹配
-        Optional<User> userOpt = userService.findByUsername(username);
-        if (!userOpt.isPresent()) {
+        User user = userService.findByUsername(username);
+        if (user == null) {
             response.put("success", false);
             response.put("message", "用户名不存在");
             return ResponseEntity.ok(response);
         }
-        
-        User user = userOpt.get();
         
         // 验证邮箱是否匹配
         if (email != null && !email.isEmpty() && !user.getEmail().equals(email)) {
@@ -130,13 +126,11 @@ public class WebAuthController {
             return "redirect:/auth/forgot-password";
         }*/
         
-        Optional<User> userOpt = userService.findByUsername(username);
-        if (!userOpt.isPresent()) {
+        User user = userService.findByUsername(username);
+        if (user == null) {
             redirectAttributes.addFlashAttribute("error", "用户不存在");
             return "redirect:/auth/forgot-password";
         }
-        
-        User user = userOpt.get();
         user.setPassword(newPassword);
         userService.save(user);
         
@@ -166,7 +160,7 @@ public class WebAuthController {
         }
         
         // 检查用户名是否已存在
-        if (userService.findByUsername(username).isPresent()) {
+        if (userService.findByUsername(username) != null) {
             redirectAttributes.addFlashAttribute("error", "用户名已存在");
             return "redirect:/auth/register";
         }

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -19,13 +18,12 @@ public class UserService {
      * 用户登录验证
      */
     public String login(String username, String password) {
-        Optional<User> userOpt = userRepository.findByUsernameOrEmailOrPhone(username);
+        User user = userRepository.findByUsernameOrEmailOrPhone(username);
         
-        if (!userOpt.isPresent()) {
+        if (user == null) {
             return "用户名不存在";
         }
         
-        User user = userOpt.get();
         if (!user.getPassword().equals(password)) {
             return "密码错误";
         }
@@ -42,8 +40,9 @@ public class UserService {
      */
     public User createWeakPasswordUser(String username) {
         // 检查用户是否已存在
-        if (findByUsername(username).isPresent()) {
-            return findByUsername(username).get();
+        User existingUser = userRepository.findByUsername(username);
+        if (existingUser != null) {
+            return existingUser;
         }
         
         User user = new User();
@@ -55,7 +54,8 @@ public class UserService {
         user.setRole(User.Role.STUDENT);
         user.setBalance(100.0);
         user.setEnabled(true);
-        return userRepository.save(user);
+        userRepository.save(user);
+        return user;
     }
     
     /**
@@ -70,7 +70,8 @@ public class UserService {
         user.setPhone(phone);
         user.setRole(User.Role.STUDENT);
         user.setEnabled(true);
-        return userRepository.save(user);
+        userRepository.save(user);
+        return user;
     }
     
     /**
@@ -78,12 +79,11 @@ public class UserService {
      */
     public String resetPassword(String username, String newPassword) {
         // 密码重置处理
-        Optional<User> userOpt = userRepository.findByUsernameOrEmailOrPhone(username);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
+        User user = userRepository.findByUsernameOrEmailOrPhone(username);
+        if (user != null) {
             user.setPassword(newPassword);
             user.setUpdateTime(LocalDateTime.now());
-            userRepository.save(user);
+            userRepository.update(user);
             return "密码重置成功";
         }
         return "用户不存在";
@@ -94,7 +94,7 @@ public class UserService {
      */
     public User getUserById(Long id) {
         // 获取用户信息
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id);
     }
     
     /**
@@ -109,14 +109,19 @@ public class UserService {
     
     public User save(User user) {
         user.setUpdateTime(LocalDateTime.now());
-        return userRepository.save(user);
+        if (user.getId() == null) {
+            userRepository.save(user);
+        } else {
+            userRepository.update(user);
+        }
+        return user;
     }
     
-    public Optional<User> findByUsername(String username) {
+    public User findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
     
-    public Optional<User> findById(Long id) {
+    public User findById(Long id) {
         return userRepository.findById(id);
     }
     
@@ -124,7 +129,7 @@ public class UserService {
         return userRepository.findAll();
     }
     
-    public Optional<User> findByUsernameOrEmailOrPhone(String username) {
+    public User findByUsernameOrEmailOrPhone(String username) {
         return userRepository.findByUsernameOrEmailOrPhone(username);
     }
 }

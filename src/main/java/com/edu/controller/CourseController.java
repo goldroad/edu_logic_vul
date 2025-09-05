@@ -45,7 +45,7 @@ public class CourseController {
     public Map<String, Object> getCourseDetail(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         
-        Course course = courseService.findById(id).orElse(null);
+        Course course = courseService.findById(id);
         
         if (course != null) {
             response.put("success", true);
@@ -134,7 +134,7 @@ public class CourseController {
             return response;
         }
         
-        Course course = courseService.findById(id).orElse(null);
+        Course course = courseService.findById(id);
         if (course == null) {
             response.put("success", false);
             response.put("message", "课程不存在");

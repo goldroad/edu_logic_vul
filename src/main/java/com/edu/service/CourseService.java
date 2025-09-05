@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CourseService {
@@ -23,34 +22,41 @@ public class CourseService {
         course.setDescription(description);
         course.setPrice(price);
         course.setOriginalPrice(price);
+        course.setTeacherId(teacher.getId());
         course.setTeacher(teacher);
         course.setStatus(Course.CourseStatus.DRAFT);
         course.setStudentCount(0);
         course.setCreateTime(LocalDateTime.now());
         course.setUpdateTime(LocalDateTime.now());
         
-        return courseRepository.save(course);
+        courseRepository.save(course);
+        return course;
     }
     
     public List<Course> getPublishedCourses() {
-        return courseRepository.findByStatus(Course.CourseStatus.PUBLISHED);
+        return courseRepository.findByStatus("PUBLISHED");
     }
     
     public List<Course> getCoursesByTeacher(User teacher) {
-        return courseRepository.findByTeacher(teacher);
+        return courseRepository.findByTeacherId(teacher.getId());
     }
     
     public List<Course> searchCourses(String keyword) {
         return courseRepository.findByTitleContaining(keyword);
     }
     
-    public Optional<Course> findById(Long id) {
+    public Course findById(Long id) {
         return courseRepository.findById(id);
     }
     
     public Course save(Course course) {
         course.setUpdateTime(LocalDateTime.now());
-        return courseRepository.save(course);
+        if (course.getId() == null) {
+            courseRepository.save(course);
+        } else {
+            courseRepository.update(course);
+        }
+        return course;
     }
     
     public List<Course> findAll() {
@@ -58,11 +64,10 @@ public class CourseService {
     }
     
     public void publishCourse(Long courseId) {
-        Optional<Course> courseOpt = courseRepository.findById(courseId);
-        if (courseOpt.isPresent()) {
-            Course course = courseOpt.get();
+        Course course = courseRepository.findById(courseId);
+        if (course != null) {
             course.setStatus(Course.CourseStatus.PUBLISHED);
-            courseRepository.save(course);
+            courseRepository.update(course);
         }
     }
 }
