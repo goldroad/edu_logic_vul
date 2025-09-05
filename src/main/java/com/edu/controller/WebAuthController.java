@@ -8,11 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/auth")
@@ -40,16 +38,16 @@ public class WebAuthController {
             return "redirect:/auth/login";
         }
         
-        // 修复用户名枚举漏洞：使用统一的错误提示
+        // 用户名枚举漏洞
         User user = userService.findByUsernameOrEmailOrPhone(username);
         if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "用户名或密码错误");
+            redirectAttributes.addFlashAttribute("error", "用户名不存在");
             return "redirect:/auth/login";
         }
         
         // 密码验证
         if (!user.getPassword().equals(password)) {
-            redirectAttributes.addFlashAttribute("error", "用户名或密码错误");
+            redirectAttributes.addFlashAttribute("error", "密码错误");
             return "redirect:/auth/login";
         }
         
