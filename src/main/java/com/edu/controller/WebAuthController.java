@@ -124,11 +124,11 @@ public class WebAuthController {
         }
         
         // 修复：验证会话中的用户名，防止抓包修改
-        String verifiedUsername = (String) session.getAttribute("verifiedUsername");
+/*        String verifiedUsername = (String) session.getAttribute("verifiedUsername");
         if (verifiedUsername == null || !verifiedUsername.equals(username)) {
             redirectAttributes.addFlashAttribute("error", "身份验证已过期，请重新验证");
             return "redirect:/auth/forgot-password";
-        }
+        }*/
         
         Optional<User> userOpt = userService.findByUsername(username);
         if (!userOpt.isPresent()) {
