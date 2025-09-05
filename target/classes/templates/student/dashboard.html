@@ -268,16 +268,23 @@
             button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>处理中...';
             button.disabled = true;
             
-            // 发送购买请求，创建订单（包含数量和折扣参数供抓包测试）
-            fetch('/edu/student/create-order', {
+            // 设置默认参数（攻击者可通过抓包修改这些值）
+            const quantity = 1;
+            const discount = 0.0;  // 折扣金额，0表示无折扣
+            const shippingFee = 0.0;  // 运费
+            
+            // 发送购买请求，创建订单（包含价格、数量、折扣等参数供抓包测试）
+            fetch('/edu/api/order/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    courseId: courseId,
-                    quantity: 1,        // 默认数量为1（攻击者可通过抓包修改）
-                    discount: 1.0       // 默认折扣为1.0，即100%（攻击者可通过抓包修改为0.1等）
+                    courseId: parseInt(courseId),
+                    price: parseFloat(originalPrice),    // 课程价格（攻击者可通过抓包修改为0.01等）
+                    quantity: quantity,                  // 数量（攻击者可通过抓包修改）
+                    discount: discount,                  // 折扣金额（攻击者可通过抓包修改）
+                    shippingFee: shippingFee            // 运费（攻击者可通过抓包修改）
                 })
             })
             .then(response => {
@@ -291,7 +298,7 @@
                 console.log('服务器响应:', data);
                 if (data.success) {
                     // 跳转到支付页面
-                    window.location.href = `/edu/student/payment/${data.orderNo}`;
+                    window.location.href = `/edu/student/payment/${data.order.orderNo}`;
                 } else {
                     // 显示详细的错误信息
                     let errorMsg = '订单创建失败';
