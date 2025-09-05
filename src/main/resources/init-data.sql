@@ -1,147 +1,175 @@
--- 初始化数据脚本
+DROP TABLE IF EXISTS `captchas`;
+CREATE TABLE `captchas`  (
+                             `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                             `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                             `create_time` datetime(6) NULL DEFAULT NULL,
+                             `expire_time` datetime(6) NULL DEFAULT NULL,
+                             `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                             `target` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                             `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                             `used` tinyint(1) NULL DEFAULT 0,
+                             `image_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+                             PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- 删除多余的表（如果存在）
-DROP TABLE IF EXISTS user_coupon;
-DROP TABLE IF EXISTS coupon;
+DROP TABLE IF EXISTS `coupons`;
+CREATE TABLE `coupons`  (
+                            `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                            `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                            `create_time` datetime(6) NULL DEFAULT NULL,
+                            `discount_value` decimal(10, 2) NULL DEFAULT NULL,
+                            `enabled` tinyint(1) NULL DEFAULT 1,
+                            `end_time` datetime(6) NULL DEFAULT NULL,
+                            `min_amount` decimal(10, 2) NULL DEFAULT NULL,
+                            `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                            `start_time` datetime(6) NULL DEFAULT NULL,
+                            `total_count` int(11) NULL DEFAULT NULL,
+                            `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                            `used_count` int(11) NULL DEFAULT NULL,
+                            PRIMARY KEY (`id`) USING BTREE,
+                            UNIQUE INDEX `UK_eplt0kkm9yf2of2lnx6c1oy9b`(`code`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- 创建管理员用户
-INSERT IGNORE INTO user (username, password, email, phone, real_name, role, balance, enabled, create_time, update_time) 
-VALUES ('admin', 'admin123', 'admin@edu.com', '13800000001', '系统管理员', 'ADMIN', 10000.0, true, NOW(), NOW());
+INSERT INTO `coupons` VALUES (1, 'NEW50', '2025-09-04 10:37:53.299429', 50.00, 1, '2025-10-04 10:37:53.299429', 100.00, '新用户专享', '2025-09-04 10:37:53.299429', 100, 'FIXED', 0);
+INSERT INTO `coupons` VALUES (2, 'DISCOUNT20', '2025-09-04 10:37:53.315098', 0.20, 1, '2025-10-04 10:37:53.299429', 200.00, '限时8折', '2025-09-04 10:37:53.299429', 50, 'PERCENT', 0);
+INSERT INTO `coupons` VALUES (3, 'CONCURRENT', '2025-09-04 10:37:53.331095', 10.00, 1, '2025-10-04 10:37:53.299429', 50.00, '并发测试券', '2025-09-04 10:37:53.299429', 5, 'FIXED', 0);
 
--- 创建教师用户
-INSERT IGNORE INTO user (username, password, email, phone, real_name, role, balance, enabled, create_time, update_time) 
-VALUES ('teacher', 'teacher123', 'teacher@edu.com', '13800000010', '张老师', 'TEACHER', 5000.0, true, NOW(), NOW());
+DROP TABLE IF EXISTS `courses`;
+CREATE TABLE `courses`  (
+                            `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                            `cover_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                            `create_time` datetime(6) NULL DEFAULT NULL,
+                            `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+                            `duration` int(11) NULL DEFAULT NULL,
+                            `original_price` decimal(10, 2) NULL DEFAULT NULL,
+                            `price` decimal(10, 2) NOT NULL,
+                            `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                            `student_count` int(11) NULL DEFAULT NULL,
+                            `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                            `update_time` datetime(6) NULL DEFAULT NULL,
+                            `teacher_id` bigint(20) NULL DEFAULT NULL,
+                            PRIMARY KEY (`id`) USING BTREE,
+                            INDEX `FKt4ba5fab1x56tmt4nsypv5lm5`(`teacher_id`) USING BTREE) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- 创建学生用户
-INSERT IGNORE INTO user (username, password, email, phone, real_name, role, balance, enabled, create_time, update_time) 
-VALUES ('student', 'student123', 'student@edu.com', '13800000020', '李同学', 'STUDENT', 1000.0, true, NOW(), NOW());
 
--- 创建弱口令用户
-INSERT IGNORE INTO user (username, password, email, phone, real_name, role, balance, enabled, create_time, update_time) 
-VALUES ('weakuser', '123456', 'weakuser@test.com', '13800001000', '弱口令用户', 'STUDENT', 500.0, true, NOW(), NOW());
+INSERT INTO `courses` VALUES (1, NULL, '2025-09-04 10:37:53.134427', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 10:37:53.147433', 2);
+INSERT INTO `courses` VALUES (2, NULL, '2025-09-04 10:37:53.178160', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 10:37:53.191081', 2);
+INSERT INTO `courses` VALUES (3, NULL, '2025-09-04 10:37:53.206798', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 10:37:53.222169', 2);
+INSERT INTO `courses` VALUES (4, NULL, '2025-09-04 10:37:53.238124', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 10:37:53.253123', 2);
+INSERT INTO `courses` VALUES (5, NULL, '2025-09-04 10:37:53.268334', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 10:37:53.284773', 2);
+INSERT INTO `courses` VALUES (6, NULL, '2025-09-04 11:00:37.317947', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:00:37.495868', 2);
+INSERT INTO `courses` VALUES (7, NULL, '2025-09-04 11:00:37.522205', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:00:37.535168', 2);
+INSERT INTO `courses` VALUES (8, NULL, '2025-09-04 11:00:37.552123', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:00:37.567084', 2);
+INSERT INTO `courses` VALUES (9, NULL, '2025-09-04 11:00:37.583052', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:00:37.598000', 2);
+INSERT INTO `courses` VALUES (10, NULL, '2025-09-04 11:00:37.615967', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:00:37.629915', 2);
+INSERT INTO `courses` VALUES (11, NULL, '2025-09-04 11:01:16.074000', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:01:16.223000', 2);
+INSERT INTO `courses` VALUES (12, NULL, '2025-09-04 11:01:16.263000', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:01:16.278000', 2);
+INSERT INTO `courses` VALUES (13, NULL, '2025-09-04 11:01:16.294000', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:01:16.308000', 2);
+INSERT INTO `courses` VALUES (14, NULL, '2025-09-04 11:01:16.325000', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:01:16.340000', 2);
+INSERT INTO `courses` VALUES (15, NULL, '2025-09-04 11:01:16.358000', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:01:16.374000', 2);
+INSERT INTO `courses` VALUES (16, NULL, '2025-09-04 11:02:41.514363', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:02:41.696412', 2);
+INSERT INTO `courses` VALUES (17, NULL, '2025-09-04 11:02:41.736721', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:02:41.749695', 2);
+INSERT INTO `courses` VALUES (18, NULL, '2025-09-04 11:02:41.764363', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:02:41.780034', 2);
+INSERT INTO `courses` VALUES (19, NULL, '2025-09-04 11:02:41.796389', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:02:41.810623', 2);
+INSERT INTO `courses` VALUES (20, NULL, '2025-09-04 11:02:41.825837', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:02:41.841282', 2);
+INSERT INTO `courses` VALUES (21, NULL, '2025-09-04 11:05:16.982628', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:05:17.110196', 2);
+INSERT INTO `courses` VALUES (22, NULL, '2025-09-04 11:05:17.181857', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:05:17.210780', 2);
+INSERT INTO `courses` VALUES (23, NULL, '2025-09-04 11:05:17.243692', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:05:17.268229', 2);
+INSERT INTO `courses` VALUES (24, NULL, '2025-09-04 11:05:17.284187', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:05:17.309119', 2);
+INSERT INTO `courses` VALUES (25, NULL, '2025-09-04 11:05:17.346021', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:05:17.360980', 2);
+INSERT INTO `courses` VALUES (26, NULL, '2025-09-04 11:10:22.711971', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:10:22.849207', 2);
+INSERT INTO `courses` VALUES (27, NULL, '2025-09-04 11:10:22.894085', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:10:22.907066', 2);
+INSERT INTO `courses` VALUES (28, NULL, '2025-09-04 11:10:22.923009', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:10:22.936971', 2);
+INSERT INTO `courses` VALUES (29, NULL, '2025-09-04 11:10:22.953928', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:10:22.968885', 2);
+INSERT INTO `courses` VALUES (30, NULL, '2025-09-04 11:10:22.985840', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:10:23.000801', 2);
+INSERT INTO `courses` VALUES (31, NULL, '2025-09-04 11:22:07.125000', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:22:07.240000', 2);
+INSERT INTO `courses` VALUES (32, NULL, '2025-09-04 11:22:07.266000', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:22:07.280000', 2);
+INSERT INTO `courses` VALUES (33, NULL, '2025-09-04 11:22:07.296000', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:22:07.313000', 2);
+INSERT INTO `courses` VALUES (34, NULL, '2025-09-04 11:22:07.329000', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:22:07.344000', 2);
+INSERT INTO `courses` VALUES (35, NULL, '2025-09-04 11:22:07.360000', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:22:07.377000', 2);
+INSERT INTO `courses` VALUES (36, NULL, '2025-09-04 11:36:04.357000', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 11:36:04.518000', 2);
+INSERT INTO `courses` VALUES (37, NULL, '2025-09-04 11:36:04.544000', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 11:36:04.560000', 2);
+INSERT INTO `courses` VALUES (38, NULL, '2025-09-04 11:36:04.575000', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 11:36:04.591000', 2);
+INSERT INTO `courses` VALUES (39, NULL, '2025-09-04 11:36:04.608000', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 11:36:04.622000', 2);
+INSERT INTO `courses` VALUES (40, NULL, '2025-09-04 11:36:04.639000', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 11:36:04.653000', 2);
+INSERT INTO `courses` VALUES (41, NULL, '2025-09-04 12:03:12.435000', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 12:03:12.592000', 2);
+INSERT INTO `courses` VALUES (42, NULL, '2025-09-04 12:03:12.620000', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 12:03:12.633000', 2);
+INSERT INTO `courses` VALUES (43, NULL, '2025-09-04 12:03:12.648000', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 12:03:12.663000', 2);
+INSERT INTO `courses` VALUES (44, NULL, '2025-09-04 12:03:12.679000', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 12:03:12.696000', 2);
+INSERT INTO `courses` VALUES (45, NULL, '2025-09-04 12:03:12.710000', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 12:03:12.724000', 2);
+INSERT INTO `courses` VALUES (46, NULL, '2025-09-04 23:48:11.595000', '从零开始学习Java编程语言，掌握面向对象编程思想', NULL, 199.00, 199.00, 'PUBLISHED', 0, 'Java基础编程', '2025-09-04 23:48:11.688000', 2);
+INSERT INTO `courses` VALUES (47, NULL, '2025-09-04 23:48:11.746000', '深入学习Spring Boot框架，快速构建企业级应用', NULL, 299.00, 299.00, 'PUBLISHED', 0, 'Spring Boot实战', '2025-09-04 23:48:11.760000', 2);
+INSERT INTO `courses` VALUES (48, NULL, '2025-09-04 23:48:11.776000', '学习数据库设计原理，掌握SQL优化技巧', NULL, 259.00, 259.00, 'PUBLISHED', 0, '数据库设计与优化', '2025-09-04 23:48:11.792000', 2);
+INSERT INTO `courses` VALUES (49, NULL, '2025-09-04 23:48:11.808000', '学习HTML、CSS、JavaScript，成为前端开发工程师', NULL, 179.00, 179.00, 'PUBLISHED', 0, '前端开发入门', '2025-09-04 23:48:11.823000', 2);
+INSERT INTO `courses` VALUES (50, NULL, '2025-09-04 23:48:11.839000', '了解网络安全基础知识，学习常见攻击防护方法', NULL, 399.00, 399.00, 'PUBLISHED', 0, '网络安全基础', '2025-09-04 23:48:11.854000', 2);
 
--- 创建测试用户
-INSERT IGNORE INTO user (username, password, email, phone, real_name, role, balance, enabled, create_time, update_time) 
-VALUES 
-('user1', '123456', 'user1@test.com', '13800000101', '测试用户1', 'STUDENT', 500.0, true, NOW(), NOW()),
-('user2', '123456', 'user2@test.com', '13800000102', '测试用户2', 'STUDENT', 500.0, true, NOW(), NOW()),
-('user3', '123456', 'user3@test.com', '13800000103', '测试用户3', 'STUDENT', 500.0, true, NOW(), NOW()),
-('user4', '123456', 'user4@test.com', '13800000104', '测试用户4', 'STUDENT', 500.0, true, NOW(), NOW()),
-('user5', '123456', 'user5@test.com', '13800000105', '测试用户5', 'STUDENT', 500.0, true, NOW(), NOW());
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders`  (
+                           `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                           `create_time` datetime(6) NULL DEFAULT NULL,
+                           `discount_amount` decimal(10, 2) NOT NULL,
+                           `final_amount` decimal(10, 2) NOT NULL,
+                           `order_no` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                           `original_amount` decimal(10, 2) NOT NULL,
+                           `pay_time` datetime(6) NULL DEFAULT NULL,
+                           `payment_method` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                           `payment_transaction_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                           `quantity` int(11) NULL DEFAULT NULL,
+                           `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                           `shipping_fee` decimal(10, 2) NOT NULL,
+                           `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                           `course_id` bigint(20) NULL DEFAULT NULL,
+                           `user_id` bigint(20) NULL DEFAULT NULL,
+                           PRIMARY KEY (`id`) USING BTREE,
+                           UNIQUE INDEX `UK_g8pohnngqi5x1nask7nff2u7w`(`order_no`) USING BTREE,
+                           INDEX `FK68snkj0g5gsjxllhjc3v5lm0r`(`course_id`) USING BTREE,
+                           INDEX `FK32ql8ubntj5uh44ph9659tiih`(`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
--- 创建更多测试课程
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT 'Java基础编程', '从零开始学习Java编程语言，掌握面向对象编程思想', 199.00, 299.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
+INSERT INTO `orders` VALUES (1, '2025-09-04 17:09:18.208000', 1.00, 0.00, 'ORD17569769582089296', 1.00, '2025-09-04 21:11:04.915153', 'BALANCE', '989a1c86-2cdc-45ca-ae09-fcb4b72f620c', 1, NULL, 0.00, 'PAID', 1, 3);
 
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT 'Spring Boot实战', '深入学习Spring Boot框架，快速构建企业级应用', 299.00, 399.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
+DROP TABLE IF EXISTS `user_coupons`;
+CREATE TABLE `user_coupons`  (
+                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                 `receive_time` datetime(6) NULL DEFAULT NULL,
+                                 `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                                 `use_time` datetime(6) NULL DEFAULT NULL,
+                                 `coupon_id` bigint(20) NULL DEFAULT NULL,
+                                 `order_id` bigint(20) NULL DEFAULT NULL,
+                                 `user_id` bigint(20) NULL DEFAULT NULL,
+                                 PRIMARY KEY (`id`) USING BTREE,
+                                 INDEX `FK9oi3p5xyfe4j32xs54nn7mi20`(`coupon_id`) USING BTREE,
+                                 INDEX `FK75uvyldhruqeeman5b0l35hnu`(`order_id`) USING BTREE,
+                                 INDEX `FK654lvm2qu8l08pyg310mbd74h`(`user_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT '数据库设计与优化', '学习数据库设计原理，掌握SQL优化技巧', 259.00, 359.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users`  (
+                          `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                          `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                          `balance` decimal(10, 2) NULL DEFAULT 0.00,
+                          `create_time` datetime(6) NULL DEFAULT NULL,
+                          `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                          `enabled` tinyint(1) NULL DEFAULT 1,
+                          `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                          `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                          `real_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                          `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+                          `update_time` datetime(6) NULL DEFAULT NULL,
+                          `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                          PRIMARY KEY (`id`) USING BTREE,
+                          UNIQUE INDEX `UK_r43af9ap4edm43mmtq01oddj6`(`username`) USING BTREE,
+                          UNIQUE INDEX `UK_6dotkott2kjsp8vw4d0m25fb7`(`email`) USING BTREE,
+                          UNIQUE INDEX `UK_du5v5sr43g5bfnji4vb8hg5s3`(`phone`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT '前端开发入门', '学习HTML、CSS、JavaScript，成为前端开发工程师', 179.00, 279.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
 
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT '网络安全基础', '了解网络安全基础知识，学习常见攻击防护方法', 399.00, 499.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT 'Python数据分析', 'Python在数据科学领域的应用，包含pandas、numpy等库', 449.00, 549.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT '微服务架构设计', '分布式系统与微服务架构设计模式', 799.00, 999.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT 'Vue.js全栈开发', 'Vue.js框架全栈开发，包含前后端分离项目实战', 549.00, 649.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT 'Docker容器技术', 'Docker容器化技术与Kubernetes集群管理', 699.00, 799.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
-INSERT IGNORE INTO course (title, description, price, original_price, teacher_id, status, create_time, update_time)
-SELECT '算法与数据结构', '计算机算法基础与常用数据结构详解', 359.00, 459.00, u.id, 'PUBLISHED', NOW(), NOW()
-FROM user u WHERE u.username = 'teacher';
-
--- 创建测试订单数据
-INSERT IGNORE INTO `order` (order_no, user_id, course_id, original_amount, discount_amount, shipping_fee, final_amount, quantity, status, create_time)
-SELECT 
-    CONCAT('ORDER', UNIX_TIMESTAMP(), '001'),
-    u.id,
-    c.id,
-    c.price,
-    50.00,
-    0.00,
-    c.price - 50.00,
-    1,
-    'PAID',
-    NOW()
-FROM user u, course c 
-WHERE u.username = 'student' AND c.title = 'Java基础编程';
-
-INSERT IGNORE INTO `order` (order_no, user_id, course_id, original_amount, discount_amount, shipping_fee, final_amount, quantity, status, create_time)
-SELECT 
-    CONCAT('ORDER', UNIX_TIMESTAMP(), '002'),
-    u.id,
-    c.id,
-    c.price,
-    0.00,
-    0.00,
-    c.price,
-    1,
-    'PENDING',
-    NOW()
-FROM user u, course c 
-WHERE u.username = 'student' AND c.title = 'Spring Boot实战';
-
-INSERT IGNORE INTO `order` (order_no, user_id, course_id, original_amount, discount_amount, shipping_fee, final_amount, quantity, status, create_time)
-SELECT 
-    CONCAT('ORDER', UNIX_TIMESTAMP(), '003'),
-    u.id,
-    c.id,
-    c.price,
-    30.00,
-    -10.00,
-    c.price - 30.00 - 10.00,
-    2,
-    'PAID',
-    NOW()
-FROM user u, course c 
-WHERE u.username = 'user1' AND c.title = '前端开发入门';
-
-INSERT IGNORE INTO `order` (order_no, user_id, course_id, original_amount, discount_amount, shipping_fee, final_amount, quantity, status, create_time)
-SELECT 
-    CONCAT('ORDER', UNIX_TIMESTAMP(), '004'),
-    u.id,
-    c.id,
-    c.price,
-    100.00,
-    0.00,
-    c.price - 100.00,
-    1,
-    'CANCELLED',
-    NOW()
-FROM user u, course c 
-WHERE u.username = 'user2' AND c.title = '网络安全基础';
-
-INSERT IGNORE INTO `order` (order_no, user_id, course_id, original_amount, discount_amount, shipping_fee, final_amount, quantity, status, create_time)
-SELECT 
-    CONCAT('ORDER', UNIX_TIMESTAMP(), '005'),
-    u.id,
-    c.id,
-    1.00,
-    0.00,
-    -5.00,
-    -4.00,
-    -1,
-    'PAID',
-    NOW()
-FROM user u, course c 
-WHERE u.username = 'user3' AND c.title = 'Python数据分析';
+INSERT INTO `users` VALUES (1, NULL, 10000.00, '2025-09-04 10:35:29.870634', 'admin@edu.com', 1, '666666', '13800000001', '系统管理员', 'ADMIN', '2025-09-05 14:49:32.868000', 'admin');
+INSERT INTO `users` VALUES (2, NULL, 5000.00, '2025-09-04 10:35:29.917526', 'teacher@edu.com', 1, 'teacher123', '13800000002', '张老师', 'TEACHER', '2025-09-04 10:35:29.917526', 'teacher');
+INSERT INTO `users` VALUES (3, NULL, 10.00, '2025-09-04 10:35:29.937387', 'student@edu.com', 1, '1', '13800000003', '李同学', 'STUDENT', '2025-09-04 21:11:04.853467', 'student');
+INSERT INTO `users` VALUES (4, NULL, 0.00, '2025-09-04 10:35:29.949279', 'weakuser@example.com', 1, '123456', NULL, NULL, 'STUDENT', '2025-09-04 10:35:29.949279', 'weakuser');
+INSERT INTO `users` VALUES (8, NULL, 500.00, '2025-09-04 10:37:53.000765', 'user1@test.com', 1, '123456', '13800000101', '测试用户1', 'STUDENT', '2025-09-04 10:37:53.000765', 'user1');
+INSERT INTO `users` VALUES (9, NULL, 500.00, '2025-09-04 10:37:53.072906', 'user2@test.com', 1, '123456', '13800000102', '测试用户2', 'STUDENT', '2025-09-04 10:37:53.072906', 'user2');
+INSERT INTO `users` VALUES (10, NULL, 500.00, '2025-09-04 10:37:53.087709', 'user3@test.com', 1, '123456', '13800000103', '测试用户3', 'STUDENT', '2025-09-04 10:37:53.087709', 'user3');
+INSERT INTO `users` VALUES (11, NULL, 500.00, '2025-09-04 10:37:53.102993', 'user4@test.com', 1, '123456', '13800000104', '测试用户4', 'STUDENT', '2025-09-04 10:37:53.102993', 'user4');
+INSERT INTO `users` VALUES (12, NULL, 500.00, '2025-09-04 10:37:53.118782', 'user5@test.com', 1, '123456', '13800000105', '测试用户5', 'STUDENT', '2025-09-04 10:37:53.118782', 'user5');

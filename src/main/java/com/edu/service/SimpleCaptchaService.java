@@ -35,7 +35,14 @@ public class SimpleCaptchaService {
      * 生成验证码图片
      */
     public byte[] generateCaptchaImage(String sessionId) {
-        String code = generateCaptcha(sessionId);
+        // 先检查是否已有验证码，如果没有则生成新的
+        CaptchaData existingData = captchaStore.get(sessionId);
+        String code;
+        if (existingData == null || existingData.expireTime.isBefore(LocalDateTime.now())) {
+            code = generateCaptcha(sessionId);
+        } else {
+            code = existingData.code;
+        }
         return createImageBytes(code);
     }
     

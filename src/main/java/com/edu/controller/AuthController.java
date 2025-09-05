@@ -107,7 +107,11 @@ public class AuthController {
     public Map<String, Object> getCaptcha(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
-        String code = simpleCaptchaService.generateCaptcha(session.getId());
+        // 获取已存在的验证码，如果不存在则生成新的
+        String code = simpleCaptchaService.getCaptchaCode(session.getId());
+        if (code == null || code.isEmpty()) {
+            code = simpleCaptchaService.generateCaptcha(session.getId());
+        }
         
         response.put("success", true);
         response.put("sessionId", session.getId());

@@ -19,7 +19,8 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // 延迟执行，确保表已经创建
         Thread.sleep(2000);
-        initializeDataFromSql();
+        // 启动时不需要再初始化
+        // initializeDataFromSql();
     }
     
     private void initializeDataFromSql() {
@@ -46,14 +47,6 @@ public class DataInitializer implements CommandLineRunner {
      */
     public void resetToInitialState() {
         try {
-            // 清空现有数据
-            jdbcTemplate.execute("DELETE FROM user_coupon");
-            jdbcTemplate.execute("DELETE FROM `order`");
-            jdbcTemplate.execute("DELETE FROM captcha");
-            jdbcTemplate.execute("DELETE FROM coupon");
-            jdbcTemplate.execute("DELETE FROM course");
-            jdbcTemplate.execute("DELETE FROM user");
-            
             // 重新初始化数据
             initializeDataFromSql();
         } catch (Exception e) {

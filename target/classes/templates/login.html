@@ -221,16 +221,16 @@
         // 验证码相关功能
         function refreshCaptcha() {
             console.log('验证码刷新请求');
-            // 刷新验证码图片
-            const captchaImage = document.getElementById('captchaImage');
-            captchaImage.src = '/edu/captcha/image?' + new Date().getTime();
             
-            // 获取新的验证码数据
+            // 先获取新的验证码数据，然后刷新图片
             fetch('/edu/api/auth/captcha')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         document.getElementById('realCaptcha').value = data.hiddenCode;
+                        // 在获取到验证码数据后再刷新图片，确保图片和数据一致
+                        const captchaImage = document.getElementById('captchaImage');
+                        captchaImage.src = '/edu/captcha/image?' + new Date().getTime();
                     }
                 })
                 .catch(error => {
