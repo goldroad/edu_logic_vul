@@ -82,31 +82,7 @@ public class PageController {
         return "student/dashboard";
     }
     
-    /**
-     * 学生个人资料页面
-     */
-    @GetMapping("/student/profile")
-    public String studentProfile(@RequestParam(required = false) Long id, 
-                                HttpSession session, Model model) {
-        User currentUser = (User) session.getAttribute("user");
-        if (currentUser == null) {
-            return "redirect:/auth/login";
-        }
-        
-        User targetUser;
-        if (id != null) {
-            // 获取目标用户资料
-            User foundUser = userService.findById(id);
-            targetUser = foundUser != null ? foundUser : currentUser;
-        } else {
-            targetUser = currentUser;
-        }
-        
-        model.addAttribute("user", currentUser);
-        model.addAttribute("targetUser", targetUser);
-        model.addAttribute("isOwnProfile", targetUser.getId().equals(currentUser.getId()));
-        return "student/profile";
-    }
+
     
     /**
      * 管理员仪表板

@@ -31,6 +31,155 @@ public class StudentController {
     private UserService userService;
     
     /**
+     * 个人资料页面 - 支持通过ID查询用户信息
+     */
+    @GetMapping("/profile")
+    public String profile(@RequestParam(required = false) Long id, 
+                         HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/auth/login";
+        }
+        
+        User targetUser;
+        if (id != null) {
+            // 根据ID从数据库查询用户信息
+            targetUser = userService.findById(id);
+            if (targetUser == null) {
+                targetUser = currentUser; // 如果查询不到，显示当前用户信息
+            }
+        } else {
+            targetUser = currentUser;
+        }
+        
+        model.addAttribute("user", currentUser);
+        model.addAttribute("targetUser", targetUser);
+        model.addAttribute("isOwnProfile", targetUser.getId().equals(currentUser.getId()));
+        return "student/profile";
+    }
+    
+    /**
+     * 更新个人资料
+     */
+    @PostMapping("/update-profile")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateProfile(@RequestBody Map<String, Object> request,
+                                                            HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "请先登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            // 从数据库获取最新用户信息
+            User currentUser = userService.findById(user.getId());
+            if (currentUser == null) {
+                response.put("success", false);
+                response.put("message", "用户不存在");
+                return ResponseEntity.ok(response);
+            }
+            
+            // 更新用户信息
+            if (request.containsKey("realName")) {
+                currentUser.setRealName(request.get("realName").toString());
+            }
+            if (request.containsKey("email")) {
+                currentUser.setEmail(request.get("email").toString());
+            }
+            if (request.containsKey("phone")) {
+                currentUser.setPhone(request.get("phone").toString());
+            }
+            
+            // 保存更新
+            userService.save(currentUser);
+            
+            // 更新session中的用户信息
+            session.setAttribute("user", currentUser);
+            
+            response.put("success", true);
+            response.put("message", "资料更新成功");
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "更新失败: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 修改密码
+     */
+    @PostMapping("/change-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, Object> request,
+                                                             HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "请先登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            String currentPassword = request.get("currentPassword").toString();
+            String newPassword = request.get("newPassword").toString();
+            String confirmPassword = request.get("confirmPassword").toString();
+            
+            // 从数据库获取最新用户信息
+            User currentUser = userService.findById(user.getId());
+            if (currentUser == null) {
+                response.put("success", false);
+                response.put("message", "用户不存在");
+                return ResponseEntity.ok(response);
+            }
+            
+            // 验证当前密码
+            if (!currentUser.getPassword().equals(currentPassword)) {
+                response.put("success", false);
+                response.put("message", "当前密码错误");
+                return ResponseEntity.ok(response);
+            }
+            
+            // 验证新密码确认
+            if (!newPassword.equals(confirmPassword)) {
+                response.put("success", false);
+                response.put("message", "新密码与确认密码不匹配");
+                return ResponseEntity.ok(response);
+            }
+            
+            // 密码长度验证
+            if (newPassword.length() < 6) {
+                response.put("success", false);
+                response.put("message", "新密码长度至少6位");
+                return ResponseEntity.ok(response);
+            }
+            
+            // 更新密码
+            currentUser.setPassword(newPassword);
+            userService.save(currentUser);
+            
+            // 更新session中的用户信息
+            session.setAttribute("user", currentUser);
+            
+            response.put("success", true);
+            response.put("message", "密码修改成功");
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "修改失败: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
      * 购买课程 - 创建订单
      */
     @PostMapping("/buy-course")
