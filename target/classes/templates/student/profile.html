@@ -403,10 +403,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('个人资料页面加载完成');
             
-            // 检查URL参数，如果有id参数，说明是通过ID查询的
+            // 检查URL参数，如果没有id参数，重定向到带当前用户ID的URL
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('id');
-            if (userId) {
+            
+            if (!userId) {
+                // 没有ID参数，重定向到带当前用户ID的URL以确保从数据库查询最新信息
+                const currentUserId = /*[[${user.id}]]*/ 1;
+                window.location.href = '/edu/student/profile?id=' + currentUserId;
+            } else {
                 console.log('查看用户ID为 ' + userId + ' 的资料');
             }
         });

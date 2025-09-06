@@ -99,7 +99,7 @@
                         <span th:text="${user.realName}">学生姓名</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/edu/student/profile">
+                        <li><a class="dropdown-item" th:href="@{/student/profile(id=${user.id})}">
                             <i class="fas fa-user me-2"></i>个人资料
                         </a></li>
                         <li><a class="dropdown-item" href="/edu/student/orders">
