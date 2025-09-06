@@ -1,67 +1,95 @@
 package com.edu.repository;
 
 import com.edu.entity.File;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface FileRepository extends JpaRepository<File, Long> {
+@Mapper
+public interface FileRepository {
     
-    /**
-     * 根据用户ID查找未删除的文件
-     */
-    List<File> findByUserIdAndIsDeletedFalseOrderByUploadTimeDesc(Long userId);
+    @Select("SELECT * FROM files WHERE id = #{id} AND user_id = #{userId} AND is_deleted = 0")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    File findByIdAndUserId(Long id, Long userId);
     
-    /**
-     * 根据用户ID分页查找未删除的文件
-     */
-    Page<File> findByUserIdAndIsDeletedFalse(Long userId, Pageable pageable);
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND is_deleted = 0 ORDER BY upload_time DESC")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> findByUserId(Long userId);
     
-    /**
-     * 根据用户ID和文件名搜索文件
-     */
-    @Query("SELECT f FROM File f WHERE f.userId = :userId AND f.isDeleted = false " +
-           "AND f.originalName LIKE %:fileName% ORDER BY f.uploadTime DESC")
-    List<File> findByUserIdAndFileNameContaining(@Param("userId") Long userId, 
-                                                @Param("fileName") String fileName);
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND original_name LIKE CONCAT('%', #{keyword}, '%') AND is_deleted = 0 ORDER BY upload_time DESC")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> searchByUserIdAndKeyword(Long userId, String keyword);
     
-    /**
-     * 根据用户ID和文件类型查找文件
-     */
-    List<File> findByUserIdAndFileTypeAndIsDeletedFalseOrderByUploadTimeDesc(Long userId, String fileType);
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND file_type = #{fileType} AND is_deleted = 0 ORDER BY upload_time DESC")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> findByUserIdAndFileType(Long userId, String fileType);
     
-    /**
-     * 根据用户ID统计文件数量
-     */
-    @Query("SELECT COUNT(f) FROM File f WHERE f.userId = :userId AND f.isDeleted = false")
-    Long countByUserId(@Param("userId") Long userId);
+    @Select("SELECT COUNT(*) FROM files WHERE user_id = #{userId} AND is_deleted = 0")
+    int countByUserId(Long userId);
     
-    /**
-     * 根据用户ID统计文件总大小
-     */
-    @Query("SELECT COALESCE(SUM(f.fileSize), 0) FROM File f WHERE f.userId = :userId AND f.isDeleted = false")
-    Long sumFileSizeByUserId(@Param("userId") Long userId);
+    @Select("SELECT COALESCE(SUM(file_size), 0) FROM files WHERE user_id = #{userId} AND is_deleted = 0")
+    long getTotalSizeByUserId(Long userId);
     
-    /**
-     * 根据用户ID统计下载次数
-     */
-    @Query("SELECT COALESCE(SUM(f.downloadCount), 0) FROM File f WHERE f.userId = :userId AND f.isDeleted = false")
-    Long sumDownloadCountByUserId(@Param("userId") Long userId);
+    @Select("SELECT COALESCE(SUM(download_count), 0) FROM files WHERE user_id = #{userId} AND is_deleted = 0")
+    int getTotalDownloadsByUserId(Long userId);
     
-    /**
-     * 根据ID和用户ID查找文件（确保用户只能访问自己的文件）
-     */
-    Optional<File> findByIdAndUserIdAndIsDeletedFalse(Long id, Long userId);
+    @Insert("INSERT INTO files(user_id, original_name, stored_name, file_path, file_size, file_type, mime_type, upload_time, download_count, is_deleted) " +
+            "VALUES(#{userId}, #{originalName}, #{storedName}, #{filePath}, #{fileSize}, #{fileType}, #{mimeType}, #{uploadTime}, #{downloadCount}, #{isDeleted})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int save(File file);
     
-    /**
-     * 根据存储名称查找文件
-     */
-    Optional<File> findByStoredNameAndIsDeletedFalse(String storedName);
+    @Update("UPDATE files SET download_count = download_count + 1 WHERE id = #{id}")
+    int incrementDownloadCount(Long id);
+    
+    @Update("UPDATE files SET is_deleted = 1 WHERE id = #{id} AND user_id = #{userId}")
+    int deleteByIdAndUserId(Long id, Long userId);
+    
+    @Delete("DELETE FROM files WHERE id = #{id}")
+    int deleteById(Long id);
 }

@@ -3,8 +3,6 @@ package com.edu.service;
 import com.edu.entity.File;
 import com.edu.repository.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,267 +10,264 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class FileService {
-    
-    private static final String UPLOAD_DIR = "files/";
-    
+
     @Autowired
     private FileRepository fileRepository;
-    
+
+    private static final String UPLOAD_DIR = "files";
+    private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
     /**
-     * 初始化文件存储目录
+     * 上传文件
      */
-    private void initUploadDir() {
+    public Map<String, Object> uploadFile(MultipartFile file, Long userId) {
+        Map<String, Object> result = new HashMap<>();
+        
         try {
+            // 验证文件
+            if (file.isEmpty()) {
+                result.put("success", false);
+                result.put("message", "文件不能为空");
+                return result;
+            }
+            
+            if (file.getSize() > MAX_FILE_SIZE) {
+                result.put("success", false);
+                result.put("message", "文件大小不能超过50MB");
+                return result;
+            }
+            
+            // 创建上传目录
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("无法创建文件存储目录", e);
-        }
-    }
-    
-    /**
-     * 上传文件
-     */
-    public File uploadFile(MultipartFile multipartFile, Long userId) {
-        if (multipartFile.isEmpty()) {
-            throw new RuntimeException("文件不能为空");
-        }
-        
-        initUploadDir();
-        
-        try {
-            String originalName = multipartFile.getOriginalFilename();
-            String fileExtension = getFileExtension(originalName);
-            String storedName = UUID.randomUUID().toString() + "." + fileExtension;
             
-            Path filePath = Paths.get(UPLOAD_DIR, storedName);
-            Files.copy(multipartFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            // 生成唯一文件名
+            String originalName = file.getOriginalFilename();
+            String extension = "";
+            if (originalName != null && originalName.contains(".")) {
+                extension = originalName.substring(originalName.lastIndexOf("."));
+            }
+            String storedName = UUID.randomUUID().toString() + extension;
+            String filePath = UPLOAD_DIR + "/" + storedName;
             
-            // 创建文件记录
-            File file = new File();
-            file.setUserId(userId);
-            file.setOriginalName(originalName);
-            file.setStoredName(storedName);
-            file.setFilePath(filePath.toString());
-            file.setFileSize(multipartFile.getSize());
-            file.setFileType(getFileType(fileExtension));
-            file.setMimeType(multipartFile.getContentType());
-            file.setUploadTime(LocalDateTime.now());
-            file.setDownloadCount(0);
-            file.setIsDeleted(false);
+            // 保存文件到磁盘
+            Path targetPath = uploadPath.resolve(storedName);
+            Files.copy(file.getInputStream(), targetPath);
             
-            return fileRepository.save(file);
+            // 确定文件类型
+            String fileType = getFileType(originalName, file.getContentType());
+            
+            // 保存文件信息到数据库
+            File fileEntity = new File(
+                userId,
+                originalName,
+                storedName,
+                filePath,
+                file.getSize(),
+                fileType,
+                file.getContentType()
+            );
+            
+            fileRepository.save(fileEntity);
+            
+            result.put("success", true);
+            result.put("message", "文件上传成功");
+            result.put("file", fileEntity);
             
         } catch (IOException e) {
-            throw new RuntimeException("文件上传失败: " + e.getMessage(), e);
+            result.put("success", false);
+            result.put("message", "文件上传失败: " + e.getMessage());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "系统错误: " + e.getMessage());
         }
+        
+        return result;
     }
-    
+
     /**
-     * 根据用户ID获取文件列表
+     * 获取用户文件列表
      */
     public List<File> getUserFiles(Long userId) {
-        return fileRepository.findByUserIdAndIsDeletedFalseOrderByUploadTimeDesc(userId);
+        return fileRepository.findByUserId(userId);
     }
-    
+
     /**
-     * 分页获取用户文件列表
+     * 搜索用户文件
      */
-    public Page<File> getUserFiles(Long userId, Pageable pageable) {
-        return fileRepository.findByUserIdAndIsDeletedFalse(userId, pageable);
-    }
-    
-    /**
-     * 根据文件名搜索用户文件
-     */
-    public List<File> searchUserFiles(Long userId, String fileName) {
-        return fileRepository.findByUserIdAndFileNameContaining(userId, fileName);
-    }
-    
-    /**
-     * 根据文件类型获取用户文件
-     */
-    public List<File> getUserFilesByType(Long userId, String fileType) {
-        return fileRepository.findByUserIdAndFileTypeAndIsDeletedFalseOrderByUploadTimeDesc(userId, fileType);
-    }
-    
-    /**
-     * 根据ID获取文件（确保用户只能访问自己的文件）
-     */
-    public Optional<File> getFileById(Long fileId, Long userId) {
-        return fileRepository.findByIdAndUserIdAndIsDeletedFalse(fileId, userId);
-    }
-    
-    /**
-     * 下载文件
-     */
-    public byte[] downloadFile(Long fileId, Long userId) {
-        Optional<File> fileOpt = getFileById(fileId, userId);
-        if (!fileOpt.isPresent()) {
-            throw new RuntimeException("文件不存在或无权访问");
+    public List<File> searchUserFiles(Long userId, String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getUserFiles(userId);
         }
-        
-        File file = fileOpt.get();
-        try {
-            Path filePath = Paths.get(file.getFilePath());
-            if (!Files.exists(filePath)) {
-                throw new RuntimeException("文件不存在");
-            }
-            
-            // 增加下载次数
-            file.setDownloadCount(file.getDownloadCount() + 1);
-            fileRepository.save(file);
-            
-            return Files.readAllBytes(filePath);
-            
-        } catch (IOException e) {
-            throw new RuntimeException("文件下载失败: " + e.getMessage(), e);
-        }
+        return fileRepository.searchByUserIdAndKeyword(userId, keyword.trim());
     }
-    
+
+    /**
+     * 按文件类型筛选
+     */
+    public List<File> filterUserFilesByType(Long userId, String fileType) {
+        if (fileType == null || fileType.trim().isEmpty() || "ALL".equals(fileType)) {
+            return getUserFiles(userId);
+        }
+        return fileRepository.findByUserIdAndFileType(userId, fileType);
+    }
+
+    /**
+     * 获取文件详情
+     */
+    public File getFileById(Long fileId, Long userId) {
+        return fileRepository.findByIdAndUserId(fileId, userId);
+    }
+
     /**
      * 删除文件
      */
-    public boolean deleteFile(Long fileId, Long userId) {
-        Optional<File> fileOpt = getFileById(fileId, userId);
-        if (!fileOpt.isPresent()) {
-            return false;
-        }
-        
-        File file = fileOpt.get();
+    public Map<String, Object> deleteFile(Long fileId, Long userId) {
+        Map<String, Object> result = new HashMap<>();
         
         try {
-            // 标记为已删除
-            file.setIsDeleted(true);
-            fileRepository.save(file);
-            
-            // 删除物理文件
-            Path filePath = Paths.get(file.getFilePath());
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
+            File file = fileRepository.findByIdAndUserId(fileId, userId);
+            if (file == null) {
+                result.put("success", false);
+                result.put("message", "文件不存在或无权限删除");
+                return result;
             }
             
-            return true;
+            // 软删除：标记为已删除
+            int updated = fileRepository.deleteByIdAndUserId(fileId, userId);
+            if (updated > 0) {
+                // 可选：删除物理文件
+                try {
+                    Path filePath = Paths.get(file.getFilePath());
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath);
+                    }
+                } catch (IOException e) {
+                    // 物理文件删除失败不影响逻辑删除
+                    System.err.println("删除物理文件失败: " + e.getMessage());
+                }
+                
+                result.put("success", true);
+                result.put("message", "文件删除成功");
+            } else {
+                result.put("success", false);
+                result.put("message", "文件删除失败");
+            }
             
-        } catch (IOException e) {
-            // 即使物理文件删除失败，也标记为已删除
-            return true;
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", "删除文件时发生错误: " + e.getMessage());
         }
+        
+        return result;
     }
-    
+
+    /**
+     * 下载文件（增加下载次数）
+     */
+    public File downloadFile(Long fileId, Long userId) {
+        File file = fileRepository.findByIdAndUserId(fileId, userId);
+        if (file != null) {
+            // 增加下载次数
+            fileRepository.incrementDownloadCount(fileId);
+            // 重新获取更新后的文件信息
+            file = fileRepository.findByIdAndUserId(fileId, userId);
+        }
+        return file;
+    }
+
     /**
      * 获取用户文件统计信息
      */
-    public FileStats getUserFileStats(Long userId) {
-        Long fileCount = fileRepository.countByUserId(userId);
-        Long totalSize = fileRepository.sumFileSizeByUserId(userId);
-        Long downloadCount = fileRepository.sumDownloadCountByUserId(userId);
+    public Map<String, Object> getUserFileStats(Long userId) {
+        Map<String, Object> stats = new HashMap<>();
         
-        return new FileStats(fileCount, totalSize, downloadCount);
+        int fileCount = fileRepository.countByUserId(userId);
+        long totalSize = fileRepository.getTotalSizeByUserId(userId);
+        int totalDownloads = fileRepository.getTotalDownloadsByUserId(userId);
+        
+        stats.put("fileCount", fileCount);
+        stats.put("totalSize", totalSize);
+        stats.put("totalDownloads", totalDownloads);
+        stats.put("formattedSize", formatFileSize(totalSize));
+        
+        return stats;
     }
-    
+
     /**
-     * 获取文件扩展名
+     * 根据文件名和MIME类型确定文件类型
      */
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            return "";
+    private String getFileType(String fileName, String mimeType) {
+        if (fileName == null) return "OTHER";
+        
+        String extension = "";
+        if (fileName.contains(".")) {
+            extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
         }
-        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-    }
-    
-    /**
-     * 根据扩展名获取文件类型
-     */
-    private String getFileType(String extension) {
-        if (extension == null) return "其他";
         
-        switch (extension.toLowerCase()) {
-            case "pdf":
-                return "PDF";
-            case "doc":
-            case "docx":
-                return "文档";
-            case "ppt":
-            case "pptx":
-                return "演示文稿";
-            case "xls":
-            case "xlsx":
-                return "表格";
+        // 根据扩展名判断
+        switch (extension) {
             case "jpg":
             case "jpeg":
             case "png":
             case "gif":
             case "bmp":
-                return "图片";
+            case "webp":
+                return "IMAGE";
             case "mp4":
             case "avi":
             case "mov":
             case "wmv":
-                return "视频";
+            case "flv":
+            case "mkv":
+                return "VIDEO";
             case "mp3":
             case "wav":
             case "flac":
-                return "音频";
+            case "aac":
+            case "ogg":
+                return "AUDIO";
+            case "pdf":
+                return "PDF";
+            case "doc":
+            case "docx":
+                return "WORD";
+            case "xls":
+            case "xlsx":
+                return "EXCEL";
+            case "ppt":
+            case "pptx":
+                return "PPT";
+            case "txt":
+                return "TEXT";
             case "zip":
             case "rar":
             case "7z":
-                return "压缩包";
-            case "txt":
-                return "文本";
-            case "java":
-            case "js":
-            case "html":
-            case "css":
-            case "py":
-            case "cpp":
-                return "代码";
+            case "tar":
+            case "gz":
+                return "ARCHIVE";
             default:
-                return "其他";
+                return "OTHER";
         }
     }
-    
+
     /**
-     * 文件统计信息类
+     * 格式化文件大小
      */
-    public static class FileStats {
-        private Long fileCount;
-        private Long totalSize;
-        private Long downloadCount;
-        
-        public FileStats(Long fileCount, Long totalSize, Long downloadCount) {
-            this.fileCount = fileCount != null ? fileCount : 0L;
-            this.totalSize = totalSize != null ? totalSize : 0L;
-            this.downloadCount = downloadCount != null ? downloadCount : 0L;
-        }
-        
-        public Long getFileCount() { return fileCount; }
-        public Long getTotalSize() { return totalSize; }
-        public Long getDownloadCount() { return downloadCount; }
-        
-        public String getFormattedSize() {
-            if (totalSize == null || totalSize == 0) return "0 B";
-            
-            long size = totalSize;
-            String[] units = {"B", "KB", "MB", "GB"};
-            int unitIndex = 0;
-            
-            while (size >= 1024 && unitIndex < units.length - 1) {
-                size /= 1024;
-                unitIndex++;
-            }
-            
-            return String.format("%.1f %s", (double) size, units[unitIndex]);
-        }
+    private String formatFileSize(long size) {
+        if (size < 1024) return size + " B";
+        if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
+        if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
+        return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
     }
 }
