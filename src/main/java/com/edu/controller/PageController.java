@@ -91,8 +91,12 @@ public class PageController {
         // 获取推荐课程
         List<Course> courses = courseService.getPublishedCourses();
         
+        // 获取用户已购买的课程ID列表
+        List<Long> paidCourseIds = orderService.getPaidCourseIdsByUserId(user.getId());
+        
         model.addAttribute("user", user);
         model.addAttribute("courses", courses);
+        model.addAttribute("paidCourseIds", paidCourseIds);
         return "student/dashboard";
     }
     

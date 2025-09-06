@@ -223,12 +223,22 @@
                                                         ¥<span th:text="${course.originalPrice}">299</span>
                                                     </small>
                                                 </div>
-                                                <button class="btn btn-primary btn-sm" 
-                                                        onclick="buyCourse(this)" 
-                                                        th:data-course-id="${course.id}"
-                                                        th:data-course-price="${course.price}">
-                                                    立即购买
-                                                </button>
+                                                <!-- 根据是否已购买显示不同按钮 -->
+                                                <div th:if="${paidCourseIds.contains(course.id)}">
+                                                    <button class="btn btn-success btn-sm" 
+                                                            onclick="startLearning(this)" 
+                                                            th:data-course-id="${course.id}">
+                                                        <i class="fas fa-play me-1"></i>立即学习
+                                                    </button>
+                                                </div>
+                                                <div th:unless="${paidCourseIds.contains(course.id)}">
+                                                    <button class="btn btn-primary btn-sm" 
+                                                            onclick="buyCourse(this)" 
+                                                            th:data-course-id="${course.id}"
+                                                            th:data-course-price="${course.price}">
+                                                        <i class="fas fa-shopping-cart me-1"></i>立即购买
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -324,9 +334,28 @@
             return confirmed;
         }
         
+        // 开始学习课程
+        function startLearning(button) {
+            const courseId = button.getAttribute('data-course-id');
+            
+            // 显示加载状态
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>加载中...';
+            button.disabled = true;
+            
+            // 跳转到课程学习页面
+            setTimeout(() => {
+                window.location.href = `/edu/student/course/learn/${courseId}`;
+            }, 500);
+        }
+        
         // 页面加载完成后的初始化
         document.addEventListener('DOMContentLoaded', function() {
             console.log('学生仪表板加载完成');
+            
+            // 统计已购买课程数量
+            const paidCourses = document.querySelectorAll('.btn-success[data-course-id]');
+            console.log(`用户已购买 ${paidCourses.length} 门课程`);
         });
     </script>
 </body>

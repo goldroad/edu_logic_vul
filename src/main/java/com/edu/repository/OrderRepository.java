@@ -88,4 +88,10 @@ public interface OrderRepository {
     
     @Delete("DELETE FROM `order` WHERE id = #{id}")
     int deleteById(Long id);
+    
+    /**
+     * 查询用户已支付的课程ID列表
+     */
+    @Select("SELECT DISTINCT course_id FROM `order` WHERE user_id = #{userId} AND status = 'PAID'")
+    List<Long> findPaidCourseIdsByUserId(Long userId);
 }

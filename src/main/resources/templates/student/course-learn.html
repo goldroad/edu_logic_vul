@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.title + ' - 课程学习'}">课程学习 - 在线教育系统</title>
+    <link href="/edu/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/edu/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .course-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        .course-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background: #000;
+        }
+        .video-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+        }
+        .course-info {
+            padding: 2rem;
+        }
+        .chapter-list {
+            background: #f8f9fa;
+            border-left: 3px solid #667eea;
+        }
+        .chapter-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .chapter-item:hover {
+            background-color: #e9ecef;
+        }
+        .chapter-item.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/edu/student/dashboard">
+                <i class="fas fa-graduation-cap me-2"></i>在线教育系统
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span th:text="${user.realName}">学生姓名</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/edu/student/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>返回仪表盘
+                        </a></li>
+                        <li><a class="dropdown-item" href="/edu/auth/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>退出登录
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 课程标题 -->
+    <div class="course-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 th:text="${course.title}">课程标题</h1>
+                    <p class="mb-0" th:text="${course.description}">课程描述</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div class="me-3">
+                            <small>学习进度</small>
+                            <div class="progress" style="width: 150px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 35%"></div>
+                            </div>
+                            <small>35% 完成</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 主要内容区 -->
+            <div class="col-md-8">
+                <div class="course-content">
+                    <!-- 视频播放区 -->
+                    <div class="video-container">
+                        <div class="video-placeholder">
+                            <i class="fas fa-play-circle fa-4x mb-3"></i>
+                            <h4>第1章：课程介绍</h4>
+                            <p>点击播放开始学习</p>
+                            <button class="btn btn-primary btn-lg">
+                                <i class="fas fa-play me-2"></i>开始播放
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 课程信息 -->
+                    <div class="course-info">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>当前章节：第1章 课程介绍</h5>
+                                <p class="text-muted">
+                                    欢迎来到本课程！在这一章节中，我们将为您介绍整个课程的学习目标、内容结构以及学习方法。
+                                    请认真观看视频内容，并做好学习笔记。
+                                </p>
+                                
+                                <div class="mt-4">
+                                    <h6>学习要点：</h6>
+                                    <ul>
+                                        <li>了解课程整体架构</li>
+                                        <li>掌握学习方法和技巧</li>
+                                        <li>熟悉课程资源和工具</li>
+                                        <li>制定个人学习计划</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>章节信息
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>时长：</strong> 15分钟</p>
+                                        <p><strong>难度：</strong> 入门</p>
+                                        <p><strong>类型：</strong> 理论讲解</p>
+                                        <p class="mb-0"><strong>资料：</strong> 
+                                            <a href="#" class="text-primary">下载课件</a>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 控制按钮 -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-outline-secondary" disabled>
+                                <i class="fas fa-chevron-left me-2"></i>上一章
+                            </button>
+                            <div>
+                                <button class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-bookmark me-2"></i>收藏
+                                </button>
+                                <button class="btn btn-outline-success me-2">
+                                    <i class="fas fa-sticky-note me-2"></i>笔记
+                                </button>
+                                <button class="btn btn-outline-warning">
+                                    <i class="fas fa-question-circle me-2"></i>提问
+                                </button>
+                            </div>
+                            <button class="btn btn-primary" onclick="nextChapter()">
+                                下一章<i class="fas fa-chevron-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 章节列表 -->
+            <div class="col-md-4">
+                <div class="course-content">
+                    <div class="p-3 border-bottom">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>课程目录
+                        </h5>
+                    </div>
+                    <div class="chapter-list">
+                        <div class="chapter-item active" onclick="selectChapter(1)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第1章：课程介绍</h6>
+                                    <small>15分钟 · 已完成</small>
+                                </div>
+                                <i class="fas fa-check-circle text-success"></i>
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="selectChapter(2)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第2章：基础概念</h6>
+                                    <small>25分钟 · 进行中</small>
+                                </div>
+                                <i class="fas fa-play-circle text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="selectChapter(3)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第3章：实践操作</h6>
+                                    <small>30分钟 · 未开始</small>
+                                </div>
+                                <i class="fas fa-lock text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="selectChapter(4)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第4章：高级应用</h6>
+                                    <small>40分钟 · 未开始</small>
+                                </div>
+                                <i class="fas fa-lock text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="selectChapter(5)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第5章：项目实战</h6>
+                                    <small>50分钟 · 未开始</small>
+                                </div>
+                                <i class="fas fa-lock text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="selectChapter(6)">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">第6章：总结与考试</h6>
+                                    <small>20分钟 · 未开始</small>
+                                </div>
+                                <i class="fas fa-lock text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 学习统计 -->
+                <div class="course-content mt-3">
+                    <div class="p-3 border-bottom">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>学习统计
+                        </h6>
+                    </div>
+                    <div class="p-3">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-primary">2</h4>
+                                <small class="text-muted">已完成章节</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success">45</h4>
+                                <small class="text-muted">学习时长(分钟)</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-warning">85</h4>
+                                <small class="text-muted">学习进度(%)</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-info">3</h4>
+                                <small class="text-muted">收藏笔记</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/edu/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 选择章节
+        function selectChapter(chapterNum) {
+            // 移除所有active状态
+            document.querySelectorAll('.chapter-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加active状态到当前章节
+            event.currentTarget.classList.add('active');
+            
+            // 更新视频内容（这里只是示例）
+            const videoPlaceholder = document.querySelector('.video-placeholder h4');
+            videoPlaceholder.textContent = `第${chapterNum}章：章节内容`;
+            
+            console.log(`切换到第${chapterNum}章`);
+        }
+        
+        // 下一章
+        function nextChapter() {
+            const activeChapter = document.querySelector('.chapter-item.active');
+            const nextChapter = activeChapter.nextElementSibling;
+            
+            if (nextChapter && nextChapter.classList.contains('chapter-item')) {
+                selectChapter(parseInt(nextChapter.textContent.match(/第(\d+)章/)[1]));
+                nextChapter.click();
+            } else {
+                alert('恭喜！您已完成所有章节的学习！');
+            }
+        }
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('课程学习页面加载完成');
+            
+            // 模拟学习进度更新
+            setTimeout(() => {
+                console.log('开始记录学习时长...');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

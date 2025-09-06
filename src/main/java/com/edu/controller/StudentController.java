@@ -471,4 +471,33 @@ public class StudentController {
         }
     }
     
+    /**
+     * 课程学习页面
+     */
+    @GetMapping("/course/learn/{courseId}")
+    public String courseLearn(@PathVariable Long courseId, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        
+        // 获取课程信息
+        Course course = courseService.findById(courseId);
+        if (course == null) {
+            model.addAttribute("error", "课程不存在");
+            return "student/dashboard";
+        }
+        
+        // 检查用户是否已购买该课程
+        List<Long> paidCourseIds = orderService.getPaidCourseIdsByUserId(user.getId());
+        if (!paidCourseIds.contains(courseId)) {
+            model.addAttribute("error", "您尚未购买此课程，请先购买后再学习");
+            return "student/dashboard";
+        }
+        
+        model.addAttribute("user", user);
+        model.addAttribute("course", course);
+        return "student/course-learn";
+    }
+    
 }

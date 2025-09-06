@@ -194,4 +194,11 @@ public class OrderService {
         }
         return order;
     }
+    
+    /**
+     * 获取用户已购买的课程ID列表
+     */
+    public List<Long> getPaidCourseIdsByUserId(Long userId) {
+        return orderRepository.findPaidCourseIdsByUserId(userId);
+    }
 }
