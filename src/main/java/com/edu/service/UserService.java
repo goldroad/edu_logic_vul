@@ -132,4 +132,126 @@ public class UserService {
     public User findByUsernameOrEmailOrPhone(String username) {
         return userRepository.findByUsernameOrEmailOrPhone(username);
     }
+    
+    /**
+     * 获取用户统计信息
+     */
+    public UserStatistics getUserStatistics() {
+        List<User> allUsers = userRepository.findAll();
+        
+        long totalUsers = allUsers.size();
+        long studentCount = allUsers.stream().filter(u -> u.getRole() == User.Role.STUDENT).count();
+        long teacherCount = allUsers.stream().filter(u -> u.getRole() == User.Role.TEACHER).count();
+        long adminCount = allUsers.stream().filter(u -> u.getRole() == User.Role.ADMIN).count();
+        
+        return new UserStatistics(totalUsers, studentCount, teacherCount, adminCount);
+    }
+    
+    /**
+     * 根据角色和状态筛选用户
+     */
+    public List<User> findUsersByRoleAndStatus(String role, Boolean enabled) {
+        List<User> allUsers = userRepository.findAll();
+        
+        return allUsers.stream()
+                .filter(user -> {
+                    boolean roleMatch = role == null || role.equals("ALL") || user.getRole().name().equals(role);
+                    boolean statusMatch = enabled == null || user.getEnabled().equals(enabled);
+                    return roleMatch && statusMatch;
+                })
+                .collect(java.util.stream.Collectors.toList());
+    }
+    
+    /**
+     * 封禁用户
+     */
+    public boolean banUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if (user != null) {
+            user.setEnabled(false);
+            user.setUpdateTime(LocalDateTime.now());
+            userRepository.update(user);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 解封用户
+     */
+    public boolean unbanUser(Long userId) {
+        User user = userRepository.findById(userId);
+        if (user != null) {
+            user.setEnabled(true);
+            user.setUpdateTime(LocalDateTime.now());
+            userRepository.update(user);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 更新用户信息
+     */
+    public boolean updateUser(Long userId, String realName, String email, String phone, String role) {
+        User user = userRepository.findById(userId);
+        if (user != null) {
+            if (realName != null && !realName.trim().isEmpty()) {
+                user.setRealName(realName);
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                user.setEmail(email);
+            }
+            if (phone != null && !phone.trim().isEmpty()) {
+                user.setPhone(phone);
+            }
+            if (role != null && !role.trim().isEmpty()) {
+                try {
+                    user.setRole(User.Role.valueOf(role));
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            }
+            user.setUpdateTime(LocalDateTime.now());
+            userRepository.update(user);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 重置用户密码
+     */
+    public boolean resetUserPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId);
+        if (user != null) {
+            user.setPassword(newPassword);
+            user.setUpdateTime(LocalDateTime.now());
+            userRepository.update(user);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 用户统计信息类
+     */
+    public static class UserStatistics {
+        private final long totalUsers;
+        private final long studentCount;
+        private final long teacherCount;
+        private final long adminCount;
+        
+        public UserStatistics(long totalUsers, long studentCount, long teacherCount, long adminCount) {
+            this.totalUsers = totalUsers;
+            this.studentCount = studentCount;
+            this.teacherCount = teacherCount;
+            this.adminCount = adminCount;
+        }
+        
+        public long getTotalUsers() { return totalUsers; }
+        public long getStudentCount() { return studentCount; }
+        public long getTeacherCount() { return teacherCount; }
+        public long getAdminCount() { return adminCount; }
+    }
 }

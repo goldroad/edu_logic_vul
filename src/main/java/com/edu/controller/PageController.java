@@ -450,13 +450,32 @@ public class PageController {
      * 用户管理页面
      */
     @GetMapping("/admin/users")
-    public String adminUsers(HttpSession session, Model model) {
+    public String adminUsers(@RequestParam(required = false) String role,
+                           @RequestParam(required = false) String status,
+                           HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/auth/login";
         }
         
+        // 获取用户统计信息
+        UserService.UserStatistics statistics = userService.getUserStatistics();
+        
+        // 根据筛选条件获取用户列表
+        Boolean enabled = null;
+        if ("active".equals(status)) {
+            enabled = true;
+        } else if ("inactive".equals(status)) {
+            enabled = false;
+        }
+        
+        List<User> users = userService.findUsersByRoleAndStatus(role, enabled);
+        
         model.addAttribute("user", user);
+        model.addAttribute("statistics", statistics);
+        model.addAttribute("users", users);
+        model.addAttribute("selectedRole", role);
+        model.addAttribute("selectedStatus", status);
         return "admin/users";
     }
 }

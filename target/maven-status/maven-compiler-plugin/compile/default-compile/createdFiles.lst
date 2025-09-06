@@ -2,6 +2,7 @@ com\edu\entity\Captcha.class
 com\edu\controller\AuthController.class
 com\edu\controller\CourseController.class
 com\edu\entity\UserCoupon$CouponStatus.class
+com\edu\controller\PageController$1.class
 com\edu\service\FileService.class
 com\edu\service\SimpleCaptchaService.class
 com\edu\controller\WebAuthController.class
