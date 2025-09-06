@@ -63,7 +63,13 @@ public class PageController {
      */
     @GetMapping("/student/dashboard")
     public String studentDashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
+        User sessionUser = (User) session.getAttribute("user");
+        if (sessionUser == null) {
+            return "redirect:/auth/login";
+        }
+        
+        // 从数据库获取最新的用户信息，确保余额是最新的
+        User user = userService.findById(sessionUser.getId());
         if (user == null) {
             return "redirect:/auth/login";
         }

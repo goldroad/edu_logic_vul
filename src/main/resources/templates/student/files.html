@@ -165,13 +165,6 @@
                         <span th:text="${user != null ? user.realName : '学生'}">学生</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/edu/student/profile">
-                            <i class="fas fa-user me-2"></i>个人资料
-                        </a></li>
-                        <li><a class="dropdown-item" href="/edu/student/orders">
-                            <i class="fas fa-shopping-cart me-2"></i>我的订单
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/edu/auth/logout">
                             <i class="fas fa-sign-out-alt me-2"></i>退出登录
                         </a></li>
@@ -188,19 +181,19 @@
                 <div class="sidebar">
                     <nav class="nav flex-column">
                         <a class="nav-link" href="/edu/student/dashboard">
-                            <i class="fas fa-tachometer-alt me-2"></i>学习中心
+                            <i class="fas fa-tachometer-alt me-2"></i>仪表盘
                         </a>
                         <a class="nav-link" href="/edu/student/courses">
                             <i class="fas fa-book me-2"></i>我的课程
                         </a>
                         <a class="nav-link" href="/edu/student/orders">
-                            <i class="fas fa-shopping-cart me-2"></i>我的订单
+                            <i class="fas fa-shopping-cart me-2"></i>订单管理
                         </a>
                         <a class="nav-link" href="/edu/student/coupons">
                             <i class="fas fa-ticket-alt me-2"></i>优惠券
                         </a>
                         <a class="nav-link active" href="/edu/student/files">
-                            <i class="fas fa-folder me-2"></i>学习资料
+                            <i class="fas fa-folder me-2"></i>文件管理
                         </a>
                         <a class="nav-link" href="/edu/student/profile">
                             <i class="fas fa-user me-2"></i>个人资料

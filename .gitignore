@@ -1,0 +1,40 @@
+# Spring Boot .gitignore
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Spring Boot
+target/
+!target/classes/
+!target/test-classes/
+
+# IntelliJ IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+
+# Maven
+.pom.xml.swp
+.pom.xml.bak
+.pom.xml~*
+*.m2e
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.next
+pom.xml.lastUpdated
+pom.xml.backup
+pom.xml.versionsBackup

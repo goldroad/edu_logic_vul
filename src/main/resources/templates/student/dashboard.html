@@ -101,13 +101,6 @@
                         <span th:text="${user.realName}">学生姓名</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/edu/student/profile">
-                            <i class="fas fa-user me-2"></i>个人资料
-                        </a></li>
-                        <li><a class="dropdown-item" href="/edu/student/settings">
-                            <i class="fas fa-cog me-2"></i>账户设置
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/edu/auth/logout">
                             <i class="fas fa-sign-out-alt me-2"></i>退出登录
                         </a></li>
@@ -124,7 +117,7 @@
                 <div class="sidebar">
                     <nav class="nav flex-column">
                         <a class="nav-link active" href="/edu/student/dashboard">
-                            <i class="fas fa-tachometer-alt me-2"></i>仪表板
+                            <i class="fas fa-tachometer-alt me-2"></i>仪表盘
                         </a>
                         <a class="nav-link" href="/edu/student/courses">
                             <i class="fas fa-book me-2"></i>我的课程
@@ -135,14 +128,11 @@
                         <a class="nav-link" href="/edu/student/coupons">
                             <i class="fas fa-ticket-alt me-2"></i>优惠券
                         </a>
+                        <a class="nav-link" href="/edu/student/files">
+                            <i class="fas fa-folder me-2"></i>文件管理
+                        </a>
                         <a class="nav-link" href="/edu/student/profile">
                             <i class="fas fa-user me-2"></i>个人资料
-                        </a>
-                        <a class="nav-link" href="/edu/student/files">
-                            <i class="fas fa-file me-2"></i>文件管理
-                        </a>
-                        <a class="nav-link" href="/edu/admin/dashboard" onclick="return testVerticalEscalation()">
-                            <i class="fas fa-shield-alt me-2"></i>管理后台
                         </a>
                     </nav>
                 </div>
