@@ -171,6 +171,34 @@ public class PageController {
     }
     
     /**
+     * 学生支付页面
+     */
+    @GetMapping("/student/payment")
+    public String studentPayment(@RequestParam String orderNo, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        
+        // 获取订单信息
+        Order order = orderService.findByOrderNo(orderNo);
+        if (order == null || !order.getUserId().equals(user.getId())) {
+            model.addAttribute("error", "订单不存在或无权访问");
+            return "student/orders";
+        }
+        
+        // 检查订单状态
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
+            model.addAttribute("error", "订单状态不正确，无法支付");
+            return "student/orders";
+        }
+        
+        model.addAttribute("user", user);
+        model.addAttribute("order", order);
+        return "student/payment";
+    }
+    
+    /**
      * 学生文件管理页面
      */
     @GetMapping("/student/files")

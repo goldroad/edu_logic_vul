@@ -290,6 +290,12 @@ public class StudentController {
                 }
             }
             
+            // 处理优惠券使用
+            if (request.containsKey("couponId") && request.get("couponId") != null) {
+                Long couponId = ((Number) request.get("couponId")).longValue();
+                userCouponService.useCoupon(couponId, Long.parseLong(orderNo.replaceAll("\\D", "")));
+            }
+            
             Order.PaymentMethod method = Order.PaymentMethod.valueOf(paymentMethod.toUpperCase());
             boolean paymentResult = orderService.payOrder(orderNo, method);
             
@@ -390,5 +396,79 @@ public class StudentController {
         
         return ResponseEntity.ok(response);
     }
-
+    
+    /**
+     * 获取可用优惠券（用于支付页面）
+     */
+    @GetMapping("/available-coupons")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getAvailableCoupons(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "用户未登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            List<UserCoupon> availableCoupons = userCouponService.getAvailableCoupons(user.getId());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", availableCoupons);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "获取可用优惠券失败: " + e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+    
+    /**
+     * 获取优惠券详情
+     */
+    @GetMapping("/coupon-detail/{couponId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getCouponDetail(
+            @PathVariable Long couponId,
+            HttpSession session) {
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "用户未登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            List<UserCoupon> userCoupons = userCouponService.getUserCoupons(user.getId());
+            UserCoupon coupon = userCoupons.stream()
+                .filter(c -> c.getId().equals(couponId))
+                .findFirst()
+                .orElse(null);
+                
+            if (coupon == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "优惠券不存在或不属于当前用户");
+                return ResponseEntity.ok(response);
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", coupon);
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "获取优惠券详情失败: " + e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+    
 }

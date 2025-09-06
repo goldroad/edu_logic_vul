@@ -104,7 +104,9 @@ public class UserCouponService {
      */
     public boolean useCoupon(Long couponId, Long orderId) {
         UserCoupon coupon = userCouponRepository.findById(couponId);
-        if (coupon == null || !coupon.isAvailable()) {
+        // if (coupon == null || !coupon.isAvailable()) {
+        // 支付时未检查优惠券状态，导致并发漏洞（查询的时候可用，但是支付的时候已经不可用）
+        if (coupon == null ) {
             return false;
         }
         

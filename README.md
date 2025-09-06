@@ -225,7 +225,21 @@ src/
     - `DELETE /api/user/{id}` - 删除用户
     - `POST /api/user/{id}/reset-password` - 重置密码
 
+创建优惠券POST /edu/api/coupon/create
+
+获取优惠券 GET /edu/api/coupon/all
+
+
+
 ## 4. 业务逻辑漏洞
+
+
+
+### 并发使用优惠券
+
+
+
+
 
 ### 并发领取优惠券
 
