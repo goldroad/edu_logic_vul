@@ -136,15 +136,17 @@ public class FileService {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            File file = fileRepository.findByIdAndUserId(fileId, userId);
+            // 没有查询改文件是否属于当前用户
+            File file = fileRepository.findById(fileId);
             if (file == null) {
                 result.put("success", false);
-                result.put("message", "文件不存在或无权限删除");
+                result.put("message", "文件不存在");
                 return result;
             }
             
             // 软删除：标记为已删除
-            int updated = fileRepository.deleteByIdAndUserId(fileId, userId);
+            // 直接根据文件id删除
+            int updated = fileRepository.deleteById(fileId);
             if (updated > 0) {
                 // 可选：删除物理文件
                 try {
@@ -259,6 +261,46 @@ public class FileService {
             default:
                 return "OTHER";
         }
+    }
+
+    /**
+     * 分页获取用户文件列表
+     */
+    public Map<String, Object> getUserFilesWithPagination(Long userId, String search, String type, int page, int size) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 计算偏移量
+        int offset = (page - 1) * size;
+        
+        List<File> files;
+        int totalCount;
+        
+        if (search != null && !search.trim().isEmpty()) {
+            // 搜索文件
+            files = fileRepository.searchUserFilesPaginated(userId, search.trim(), offset, size);
+            totalCount = fileRepository.countSearchUserFiles(userId, search.trim());
+        } else if (type != null && !type.trim().isEmpty() && !"ALL".equals(type)) {
+            // 按类型筛选
+            files = fileRepository.getUserFilesByTypePaginated(userId, type, offset, size);
+            totalCount = fileRepository.countUserFilesByType(userId, type);
+        } else {
+            // 获取所有文件
+            files = fileRepository.getUserFilesPaginated(userId, offset, size);
+            totalCount = fileRepository.countByUserId(userId);
+        }
+        
+        // 计算总页数
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+        
+        result.put("files", files);
+        result.put("currentPage", page);
+        result.put("totalPages", totalPages);
+        result.put("totalCount", totalCount);
+        result.put("pageSize", size);
+        result.put("hasNext", page < totalPages);
+        result.put("hasPrev", page > 1);
+        
+        return result;
     }
 
     /**

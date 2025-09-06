@@ -39,6 +39,21 @@ public interface FileRepository {
         @Result(property = "isDeleted", column = "is_deleted")
     })
     List<File> findByUserId(Long userId);
+
+    @Select("SELECT * FROM files WHERE id = #{id} AND is_deleted = 0 ORDER BY upload_time DESC")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    File findById(Long id);
     
     @Select("SELECT * FROM files WHERE user_id = #{userId} AND original_name LIKE CONCAT('%', #{keyword}, '%') AND is_deleted = 0 ORDER BY upload_time DESC")
     @Results({
@@ -92,4 +107,56 @@ public interface FileRepository {
     
     @Delete("DELETE FROM files WHERE id = #{id}")
     int deleteById(Long id);
+    
+    // 分页查询方法
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND is_deleted = 0 ORDER BY upload_time DESC LIMIT #{size} OFFSET #{offset}")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> getUserFilesPaginated(@Param("userId") Long userId, @Param("offset") int offset, @Param("size") int size);
+    
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND original_name LIKE CONCAT('%', #{keyword}, '%') AND is_deleted = 0 ORDER BY upload_time DESC LIMIT #{size} OFFSET #{offset}")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> searchUserFilesPaginated(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+    
+    @Select("SELECT COUNT(*) FROM files WHERE user_id = #{userId} AND original_name LIKE CONCAT('%', #{keyword}, '%') AND is_deleted = 0")
+    int countSearchUserFiles(@Param("userId") Long userId, @Param("keyword") String keyword);
+    
+    @Select("SELECT * FROM files WHERE user_id = #{userId} AND file_type = #{type} AND is_deleted = 0 ORDER BY upload_time DESC LIMIT #{size} OFFSET #{offset}")
+    @Results({
+        @Result(property = "userId", column = "user_id"),
+        @Result(property = "originalName", column = "original_name"),
+        @Result(property = "storedName", column = "stored_name"),
+        @Result(property = "filePath", column = "file_path"),
+        @Result(property = "fileSize", column = "file_size"),
+        @Result(property = "fileType", column = "file_type"),
+        @Result(property = "mimeType", column = "mime_type"),
+        @Result(property = "uploadTime", column = "upload_time"),
+        @Result(property = "downloadCount", column = "download_count"),
+        @Result(property = "isDeleted", column = "is_deleted")
+    })
+    List<File> getUserFilesByTypePaginated(@Param("userId") Long userId, @Param("type") String type, @Param("offset") int offset, @Param("size") int size);
+    
+    @Select("SELECT COUNT(*) FROM files WHERE user_id = #{userId} AND file_type = #{type} AND is_deleted = 0")
+    int countUserFilesByType(@Param("userId") Long userId, @Param("type") String type);
 }

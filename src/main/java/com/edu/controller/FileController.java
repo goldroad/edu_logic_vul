@@ -52,7 +52,12 @@ public class FileController {
      * 获取用户文件列表
      */
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> getUserFiles(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> getUserFiles(
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String type,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         
         User user = (User) session.getAttribute("user");
@@ -63,9 +68,9 @@ public class FileController {
         }
         
         try {
-            List<File> files = fileService.getUserFiles(user.getId());
+            Map<String, Object> result = fileService.getUserFilesWithPagination(user.getId(), search, type, page, size);
             response.put("success", true);
-            response.put("files", files);
+            response.putAll(result);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("success", false);

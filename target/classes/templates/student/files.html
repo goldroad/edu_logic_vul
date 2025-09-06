@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -406,6 +406,9 @@
         // 全局变量
         let currentFiles = [];
         let selectedFilesToUpload = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let pageSize = 10;
         
         // DOM 元素
         const uploadArea = document.getElementById('uploadArea');
@@ -429,18 +432,20 @@
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    loadFileList();
+                    currentPage = 1;
+                    loadFileList(1);
                 }, 500);
             });
             
             // 类型筛选
             typeFilter.addEventListener('change', function() {
-                loadFileList();
+                currentPage = 1;
+                loadFileList(1);
             });
         });
         
         // 加载文件列表
-        function loadFileList() {
+        function loadFileList(page = 1) {
             showLoading();
             
             const searchTerm = searchInput.value.trim();
@@ -452,13 +457,14 @@
             if (searchTerm) {
                 params.append('search', searchTerm);
             }
-            if (fileType) {
+            if (fileType && fileType !== 'ALL') {
                 params.append('type', fileType);
             }
             
-            if (params.toString()) {
-                url += '?' + params.toString();
-            }
+            params.append('page', page);
+            params.append('size', pageSize);
+            
+            url += '?' + params.toString();
             
             fetch(url)
                 .then(response => response.json())
@@ -466,10 +472,10 @@
                     hideLoading();
                     if (data.success) {
                         currentFiles = data.files;
+                        currentPage = data.currentPage || 1;
+                        totalPages = data.totalPages || 1;
                         renderFileList(data.files);
-                        if (data.stats) {
-                            updateStats(data.stats);
-                        }
+                        updatePagination();
                     } else {
                         showError('加载文件列表失败: ' + data.message);
                     }
@@ -486,7 +492,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        updateStats(data.stats);
+                        updateStats(data);
                     }
                 })
                 .catch(error => {
@@ -741,6 +747,62 @@
             }
         }
         
+        // 更新统计信息
+        function updateStats(stats) {
+            document.getElementById('usedSpace').textContent = formatFileSize(stats.totalSize || 0);
+            document.getElementById('fileCount').textContent = stats.fileCount || 0;
+            // 下载次数显示
+            const downloadElements = document.querySelectorAll('.card h4');
+            if (downloadElements.length >= 4) {
+                downloadElements[3].textContent = stats.totalDownloads || 0;
+            }
+        }
+        
+        // 更新分页
+        function updatePagination() {
+            const pagination = document.querySelector('.pagination');
+            if (!pagination) return;
+            
+            pagination.innerHTML = '';
+            
+            // 上一页
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage <= 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">上一页</a>`;
+            pagination.appendChild(prevLi);
+            
+            // 页码
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                pagination.appendChild(li);
+            }
+            
+            // 下一页
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage >= totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">下一页</a>`;
+            pagination.appendChild(nextLi);
+        }
+        
+        // 切换页面
+        function changePage(page) {
+            if (page < 1 || page > totalPages || page === currentPage) return;
+            loadFileList(page);
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(size) {
+            if (size < 1024) return size + ' B';
+            if (size < 1024 * 1024) return (size / 1024).toFixed(1) + ' KB';
+            if (size < 1024 * 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + ' MB';
+            return (size / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+
         // 工具函数
         function showLoading() {
             loadingIndicator.style.display = 'block';
