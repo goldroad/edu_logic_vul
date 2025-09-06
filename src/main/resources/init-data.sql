@@ -1,16 +1,3 @@
-DROP TABLE IF EXISTS `captchas`;
-CREATE TABLE `captchas`  (
-                             `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                             `code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                             `create_time` datetime(6) NULL DEFAULT NULL,
-                             `expire_time` datetime(6) NULL DEFAULT NULL,
-                             `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                             `target` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-                             `type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-                             `used` tinyint(1) NULL DEFAULT 0,
-                             `image_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
-                             PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 DROP TABLE IF EXISTS `coupon`;
 CREATE TABLE `coupon`  (

@@ -1,4 +1,3 @@
-com\edu\entity\Captcha.class
 com\edu\controller\AuthController.class
 com\edu\controller\CourseController.class
 com\edu\entity\UserCoupon$CouponStatus.class
@@ -25,11 +24,9 @@ com\edu\repository\UserRepository.class
 com\edu\service\CourseService.class
 com\edu\service\UserService.class
 com\edu\entity\Coupon.class
-com\edu\service\CaptchaService.class
 com\edu\entity\Order$OrderStatus.class
 com\edu\entity\Coupon$CouponType.class
 com\edu\entity\File.class
-com\edu\entity\Captcha$CaptchaType.class
 com\edu\service\SimpleCaptchaService$CaptchaData.class
 com\edu\EduLogicVulApplication.class
 com\edu\controller\CaptchaController.class
@@ -42,4 +39,3 @@ com\edu\entity\User$Role.class
 com\edu\service\CouponService.class
 com\edu\entity\Order.class
 com\edu\repository\FileRepository.class
-com\edu\repository\CaptchaRepository.class

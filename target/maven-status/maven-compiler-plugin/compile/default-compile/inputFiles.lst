@@ -1,9 +1,7 @@
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\controller\PageController.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\service\OrderService.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\controller\AdminController.java
-C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\repository\CaptchaRepository.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\repository\FileRepository.java
-C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\service\CaptchaService.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\service\CouponService.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\controller\CouponController.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\entity\UserCoupon.java
@@ -34,4 +32,3 @@ C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\service\Cou
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\controller\AuthController.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\entity\Order.java
 C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\repository\UserCouponRepository.java
-C:\Users\Administrator\CodeBuddy\edu_logic_vul\src\main\java\com\edu\entity\Captcha.java
