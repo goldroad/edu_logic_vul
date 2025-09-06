@@ -180,3 +180,22 @@ INSERT INTO `users` VALUES (9, NULL, 500.00, '2025-09-04 10:37:53.072906', 'user
 INSERT INTO `users` VALUES (10, NULL, 500.00, '2025-09-04 10:37:53.087709', 'user3@test.com', 1, '123456', '13800000103', '测试用户3', 'STUDENT', '2025-09-04 10:37:53.087709', 'user3');
 INSERT INTO `users` VALUES (11, NULL, 500.00, '2025-09-04 10:37:53.102993', 'user4@test.com', 1, '123456', '13800000104', '测试用户4', 'STUDENT', '2025-09-04 10:37:53.102993', 'user4');
 INSERT INTO `users` VALUES (12, NULL, 500.00, '2025-09-04 10:37:53.118782', 'user5@test.com', 1, '123456', '13800000105', '测试用户5', 'STUDENT', '2025-09-04 10:37:53.118782', 'user5');
+
+DROP TABLE IF EXISTS `files`;
+CREATE TABLE `files` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `original_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stored_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_size` bigint(20) NOT NULL,
+  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `mime_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `upload_time` datetime(6) NOT NULL,
+  `download_count` int(11) NOT NULL DEFAULT 0,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id` (`user_id`) USING BTREE,
+  INDEX `idx_stored_name` (`stored_name`) USING BTREE,
+  INDEX `idx_upload_time` (`upload_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
