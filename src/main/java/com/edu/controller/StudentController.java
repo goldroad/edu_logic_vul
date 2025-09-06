@@ -3,9 +3,11 @@ package com.edu.controller;
 import com.edu.entity.Course;
 import com.edu.entity.Order;
 import com.edu.entity.User;
+import com.edu.entity.UserCoupon;
 import com.edu.service.CourseService;
 import com.edu.service.OrderService;
 import com.edu.service.UserService;
+import com.edu.service.UserCouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -29,6 +32,9 @@ public class StudentController {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private UserCouponService userCouponService;
     
     /**
      * 个人资料页面 - 支持通过ID查询用户信息
@@ -303,5 +309,86 @@ public class StudentController {
         return ResponseEntity.ok(response);
     }
     
+    /**
+     * 获取用户优惠券数据
+     */
+    @GetMapping("/coupons/data")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getCouponsData(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "请先登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            // 获取统计信息
+            Map<String, Integer> stats = userCouponService.getUserCouponStats(user.getId());
+            
+            // 获取各状态的优惠券
+            List<UserCoupon> availableCoupons = userCouponService.getAvailableCoupons(user.getId());
+            List<UserCoupon> usedCoupons = userCouponService.getUsedCoupons(user.getId());
+            List<UserCoupon> expiredCoupons = userCouponService.getExpiredCoupons(user.getId());
+            
+            response.put("success", true);
+            response.put("stats", stats);
+            response.put("availableCoupons", availableCoupons);
+            response.put("usedCoupons", usedCoupons);
+            response.put("expiredCoupons", expiredCoupons);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "获取优惠券数据失败: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * 根据状态筛选优惠券
+     */
+    @GetMapping("/coupons/filter")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> filterCoupons(@RequestParam String status, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.put("success", false);
+            response.put("message", "请先登录");
+            return ResponseEntity.ok(response);
+        }
+        
+        try {
+            List<UserCoupon> coupons;
+            
+            switch (status.toLowerCase()) {
+                case "available":
+                    coupons = userCouponService.getAvailableCoupons(user.getId());
+                    break;
+                case "used":
+                    coupons = userCouponService.getUsedCoupons(user.getId());
+                    break;
+                case "expired":
+                    coupons = userCouponService.getExpiredCoupons(user.getId());
+                    break;
+                default:
+                    coupons = userCouponService.getUserCoupons(user.getId());
+                    break;
+            }
+            
+            response.put("success", true);
+            response.put("coupons", coupons);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "筛选优惠券失败: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
 
 }

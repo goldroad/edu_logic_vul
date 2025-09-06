@@ -220,12 +220,12 @@
                     </div>
 
                     <!-- 优惠券统计 -->
-                    <div class="row mb-4">
+                    <div class="row mb-4" id="couponStats">
                         <div class="col-md-3">
                             <div class="card stats-card text-center">
                                 <div class="card-body">
                                     <i class="fas fa-ticket-alt fa-2x mb-2"></i>
-                                    <h4>8</h4>
+                                    <h4 id="totalCount">0</h4>
                                     <small>总优惠券</small>
                                 </div>
                             </div>
@@ -234,7 +234,7 @@
                             <div class="card text-center" style="background: #28a745; color: white;">
                                 <div class="card-body">
                                     <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                    <h4>5</h4>
+                                    <h4 id="availableCount">0</h4>
                                     <small>可使用</small>
                                 </div>
                             </div>
@@ -243,7 +243,7 @@
                             <div class="card text-center" style="background: #6c757d; color: white;">
                                 <div class="card-body">
                                     <i class="fas fa-times-circle fa-2x mb-2"></i>
-                                    <h4>2</h4>
+                                    <h4 id="usedCount">0</h4>
                                     <small>已使用</small>
                                 </div>
                             </div>
@@ -252,7 +252,7 @@
                             <div class="card text-center" style="background: #dc3545; color: white;">
                                 <div class="card-body">
                                     <i class="fas fa-clock fa-2x mb-2"></i>
-                                    <h4>1</h4>
+                                    <h4 id="expiredCount">0</h4>
                                     <small>已过期</small>
                                 </div>
                             </div>
@@ -310,186 +310,21 @@
                     </div>
 
                     <!-- 可使用的优惠券 -->
-                    <h5 class="mt-4 mb-3"><i class="fas fa-check-circle text-success me-2"></i>可使用 (5张)</h5>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-available">
-                                <div class="coupon-corner corner-available"></div>
-                                <div class="coupon-status status-available">可使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">50%</div>
-                                            <div class="coupon-type">折扣券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>新人专享折扣券</h6>
-                                            <p class="text-muted mb-2">适用于所有课程，首次购买专享</p>
-                                            <div class="coupon-code mb-2">NEW50</div>
-                                            <small class="text-muted">有效期至: 2024-12-31</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-available">
-                                <div class="coupon-corner corner-available"></div>
-                                <div class="coupon-status status-available">可使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">¥30</div>
-                                            <div class="coupon-type">满减券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>满200减30优惠券</h6>
-                                            <p class="text-muted mb-2">购买课程满200元可用</p>
-                                            <div class="coupon-code mb-2">SAVE30</div>
-                                            <small class="text-muted">有效期至: 2024-10-15</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-available">
-                                <div class="coupon-corner corner-available"></div>
-                                <div class="coupon-status status-available">可使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">20%</div>
-                                            <div class="coupon-type">折扣券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>编程课程专享券</h6>
-                                            <p class="text-muted mb-2">仅限编程类课程使用</p>
-                                            <div class="coupon-code mb-2">CODE20</div>
-                                            <small class="text-muted">有效期至: 2024-11-30</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-available">
-                                <div class="coupon-corner corner-available"></div>
-                                <div class="coupon-status status-available">可使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">¥50</div>
-                                            <div class="coupon-type">满减券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>满300减50优惠券</h6>
-                                            <p class="text-muted mb-2">购买课程满300元可用</p>
-                                            <div class="coupon-code mb-2">BIG50</div>
-                                            <small class="text-muted">有效期至: 2024-09-30</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-available">
-                                <div class="coupon-corner corner-available"></div>
-                                <div class="coupon-status status-available">可使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">15%</div>
-                                            <div class="coupon-type">折扣券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>周末学习优惠券</h6>
-                                            <p class="text-muted mb-2">周末购买课程专享</p>
-                                            <div class="coupon-code mb-2">WEEKEND15</div>
-                                            <small class="text-muted">有效期至: 2024-10-31</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <h5 class="mt-4 mb-3" id="availableTitle"><i class="fas fa-check-circle text-success me-2"></i>可使用 (0张)</h5>
+                    <div class="row" id="availableCoupons">
+                        <!-- 动态加载可使用的优惠券 -->
                     </div>
 
                     <!-- 已使用的优惠券 -->
-                    <h5 class="mt-4 mb-3"><i class="fas fa-times-circle text-secondary me-2"></i>已使用 (2张)</h5>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-used">
-                                <div class="coupon-corner corner-used"></div>
-                                <div class="coupon-status status-used">已使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">¥20</div>
-                                            <div class="coupon-type">满减券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>满100减20优惠券</h6>
-                                            <p class="text-muted mb-2">已于2024-09-01使用</p>
-                                            <div class="coupon-code mb-2">FIRST20</div>
-                                            <small class="text-muted">使用订单: ORD20240901001</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-used">
-                                <div class="coupon-corner corner-used"></div>
-                                <div class="coupon-status status-used">已使用</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">10%</div>
-                                            <div class="coupon-type">折扣券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>学生专享折扣券</h6>
-                                            <p class="text-muted mb-2">已于2024-08-28使用</p>
-                                            <div class="coupon-code mb-2">STUDENT10</div>
-                                            <small class="text-muted">使用订单: ORD20240828002</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <h5 class="mt-4 mb-3" id="usedTitle"><i class="fas fa-times-circle text-secondary me-2"></i>已使用 (0张)</h5>
+                    <div class="row" id="usedCoupons">
+                        <!-- 动态加载已使用的优惠券 -->
                     </div>
 
                     <!-- 已过期的优惠券 -->
-                    <h5 class="mt-4 mb-3"><i class="fas fa-clock text-danger me-2"></i>已过期 (1张)</h5>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="coupon-card coupon-expired">
-                                <div class="coupon-corner corner-expired"></div>
-                                <div class="coupon-status status-expired">已过期</div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-4 text-center">
-                                            <div class="coupon-value">25%</div>
-                                            <div class="coupon-type">折扣券</div>
-                                        </div>
-                                        <div class="col-8">
-                                            <h6>夏季特惠折扣券</h6>
-                                            <p class="text-muted mb-2">已于2024-08-31过期</p>
-                                            <div class="coupon-code mb-2">SUMMER25</div>
-                                            <small class="text-danger">过期时间: 2024-08-31</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <h5 class="mt-4 mb-3" id="expiredTitle"><i class="fas fa-clock text-danger me-2"></i>已过期 (0张)</h5>
+                    <div class="row" id="expiredCoupons">
+                        <!-- 动态加载已过期的优惠券 -->
                     </div>
                 </div>
             </div>
@@ -497,5 +332,155 @@
     </div>
 
     <script src="/edu/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 页面加载完成后获取优惠券数据
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCouponsData();
+        });
+
+        // 加载优惠券数据
+        function loadCouponsData() {
+            fetch('/edu/student/coupons/data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateStats(data.stats);
+                        renderCoupons(data.availableCoupons, 'available');
+                        renderCoupons(data.usedCoupons, 'used');
+                        renderCoupons(data.expiredCoupons, 'expired');
+                    } else {
+                        console.error('获取优惠券数据失败:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('请求失败:', error);
+                });
+        }
+
+        // 更新统计数据
+        function updateStats(stats) {
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('availableCount').textContent = stats.available;
+            document.getElementById('usedCount').textContent = stats.used;
+            document.getElementById('expiredCount').textContent = stats.expired;
+        }
+
+        // 渲染优惠券列表
+        function renderCoupons(coupons, type) {
+            const container = document.getElementById(type + 'Coupons');
+            const title = document.getElementById(type + 'Title');
+            
+            // 更新标题
+            const typeNames = {
+                'available': '可使用',
+                'used': '已使用',
+                'expired': '已过期'
+            };
+            const icons = {
+                'available': 'fas fa-check-circle text-success',
+                'used': 'fas fa-times-circle text-secondary',
+                'expired': 'fas fa-clock text-danger'
+            };
+            
+            title.innerHTML = `<i class="${icons[type]} me-2"></i>${typeNames[type]} (${coupons.length}张)`;
+            
+            // 清空容器
+            container.innerHTML = '';
+            
+            // 渲染优惠券
+            coupons.forEach(coupon => {
+                const couponHtml = createCouponCard(coupon, type);
+                container.innerHTML += couponHtml;
+            });
+        }
+
+        // 创建优惠券卡片HTML
+        function createCouponCard(coupon, type) {
+            const typeClasses = {
+                'available': 'coupon-available',
+                'used': 'coupon-used',
+                'expired': 'coupon-expired'
+            };
+            
+            const cornerClasses = {
+                'available': 'corner-available',
+                'used': 'corner-used',
+                'expired': 'corner-expired'
+            };
+            
+            const statusClasses = {
+                'available': 'status-available',
+                'used': 'status-used',
+                'expired': 'status-expired'
+            };
+            
+            const statusTexts = {
+                'available': '可使用',
+                'used': '已使用',
+                'expired': '已过期'
+            };
+
+            // 格式化折扣值显示
+            let discountDisplay = '';
+            let typeDisplay = '';
+            if (coupon.type === 'PERCENT') {
+                discountDisplay = coupon.discountValue + '%';
+                typeDisplay = '折扣券';
+            } else {
+                discountDisplay = '¥' + coupon.discountValue;
+                typeDisplay = '满减券';
+            }
+
+            // 格式化时间显示
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '';
+                return new Date(dateStr).toLocaleDateString('zh-CN');
+            };
+
+            // 根据状态显示不同的时间信息
+            let timeInfo = '';
+            if (type === 'available') {
+                timeInfo = `有效期至: ${formatDate(coupon.expireTime)}`;
+            } else if (type === 'used') {
+                timeInfo = `已于${formatDate(coupon.useTime)}使用`;
+                if (coupon.orderId) {
+                    timeInfo += `<br><small class="text-muted">使用订单: ${coupon.orderId}</small>`;
+                }
+            } else if (type === 'expired') {
+                timeInfo = `已于${formatDate(coupon.expireTime)}过期`;
+            }
+
+            return `
+                <div class="col-md-6">
+                    <div class="coupon-card ${typeClasses[type]}">
+                        <div class="coupon-corner ${cornerClasses[type]}"></div>
+                        <div class="coupon-status ${statusClasses[type]}">${statusTexts[type]}</div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4 text-center">
+                                    <div class="coupon-value">${discountDisplay}</div>
+                                    <div class="coupon-type">${typeDisplay}</div>
+                                </div>
+                                <div class="col-8">
+                                    <h6>${coupon.couponName}</h6>
+                                    <p class="text-muted mb-2">${coupon.description || ''}</p>
+                                    <div class="coupon-code mb-2">${coupon.couponCode}</div>
+                                    <small class="${type === 'expired' ? 'text-danger' : 'text-muted'}">${timeInfo}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 筛选功能
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('select')) {
+                // 这里可以添加筛选逻辑
+                console.log('筛选条件改变:', e.target.value);
+            }
+        });
+    </script>
 </body>
 </html>
