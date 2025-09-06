@@ -179,11 +179,16 @@
         <div class="header">
             <h1>🎓 在线教育系统</h1>
             <p>业务逻辑漏洞靶场 - 用于安全测试和学习</p>
+            <div style="margin-top: 20px;">
+                <a href="/edu/auth/login" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block; transition: background 0.3s;">
+                    🔐 登录系统
+                </a>
+            </div>
         </div>
         
         <div class="warning">
             <h3>⚠️ 安全警告</h3>
-            <p>本系统仅用于安全测试和教学目的，包含多种业务逻辑漏洞。请勿在生产环境中使用！</p>
+            <p>本系统仅用于安全测试和教学目的，包含多种业务逻辑漏洞。</p>
         </div>
         
         <div class="features">
@@ -210,19 +215,20 @@
             <div class="feature-card">
                 <h3>🔑 权限控制漏洞</h3>
                 <ul>
-                    <li>权限访问控制</li>
-                    <li>角色权限管理</li>
                     <li>接口未授权访问</li>
                     <li>敏感信息泄露</li>
+                    <li>查看其他用户个人信息</li>
+                    <li>删除其他用户文件</li>
                 </ul>
             </div>
             
             <div class="feature-card">
                 <h3>🎫 业务逻辑漏洞</h3>
                 <ul>
-                    <li>优惠券领取功能</li>
+                    <li>并发超额领取优惠券</li>
+                    <li>并发重复使用优惠券</li>
                     <li>任意用户注册</li>
-                    <li>文件读取功能</li>
+                    <li>任意文件读取</li>
                     <li>目录遍历攻击</li>
                 </ul>
             </div>

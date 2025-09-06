@@ -27,18 +27,32 @@ public class PageController {
     private OrderService orderService;
     
     /**
-     * 首页重定向到登录页面
+     * 首页
      */
     @GetMapping("/")
     public String index() {
-        return "redirect:/auth/login";
+        return "index";
     }
     
     /**
      * 显示登录页面
      */
     @GetMapping("/auth/login")
-    public String loginPage() {
+    public String loginPage(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+            // 已登录用户根据角色跳转到对应的dashboard
+            switch (user.getRole()) {
+                case ADMIN:
+                    return "redirect:/admin/dashboard";
+                case TEACHER:
+                    return "redirect:/teacher/dashboard";
+                case STUDENT:
+                    return "redirect:/student/dashboard";
+                default:
+                    return "redirect:/student/dashboard";
+            }
+        }
         return "login";
     }
     
