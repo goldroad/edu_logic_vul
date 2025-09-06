@@ -84,6 +84,25 @@ public class CouponService {
         userCoupon.setCouponId(coupon.getId());
         userCoupon.setUser(user);
         userCoupon.setCoupon(coupon);
+        
+        // 从Coupon对象复制必要字段到UserCoupon
+        userCoupon.setCouponName(coupon.getName());
+        userCoupon.setCouponCode(coupon.getCode());
+        userCoupon.setDescription("领取优惠券：" + coupon.getName());
+        
+        // 转换CouponType枚举
+        if (coupon.getType() == Coupon.CouponType.FIXED) {
+            userCoupon.setType(UserCoupon.CouponType.FIXED);
+        } else if (coupon.getType() == Coupon.CouponType.PERCENT) {
+            userCoupon.setType(UserCoupon.CouponType.PERCENT);
+        }
+        
+        userCoupon.setDiscountValue(coupon.getDiscountValue());
+        userCoupon.setMinAmount(coupon.getMinAmount());
+        userCoupon.setExpireTime(coupon.getEndTime());
+        userCoupon.setUsageRestriction("正常领取");
+        userCoupon.setApplicableCategory("All courses");
+        
         userCoupon.setStatus(UserCoupon.CouponStatus.UNUSED);
         userCoupon.setReceiveTime(LocalDateTime.now());
         userCouponRepository.save(userCoupon);
@@ -170,5 +189,69 @@ public class CouponService {
     
     public Coupon findByCode(String code) {
         return couponRepository.findByCode(code);
+    }
+    
+    /**
+     * 通过兑换码兑换优惠券
+     */
+    public boolean exchangeCouponByCode(String code, User user) {
+        // 根据兑换码查找优惠券
+        Coupon coupon = couponRepository.findByCode(code);
+        if (coupon == null) {
+            return false;
+        }
+        
+        // 检查优惠券是否有效
+        LocalDateTime now = LocalDateTime.now();
+        if (!coupon.getEnabled() || 
+            coupon.getStartTime().isAfter(now) || 
+            coupon.getEndTime().isBefore(now)) {
+            return false;
+        }
+        
+        // 检查用户是否已经领取过
+        if (userCouponRepository.existsByUserIdAndCouponId(user.getId(), coupon.getId())) {
+            return false;
+        }
+        
+        // 检查数量
+        if (coupon.getUsedCount() >= coupon.getTotalCount()) {
+            return false;
+        }
+        
+        // 创建用户优惠券记录
+        UserCoupon userCoupon = new UserCoupon();
+        userCoupon.setUserId(user.getId());
+        userCoupon.setCouponId(coupon.getId());
+        userCoupon.setUser(user);
+        userCoupon.setCoupon(coupon);
+        
+        // 从Coupon对象复制必要字段到UserCoupon
+        userCoupon.setCouponName(coupon.getName());
+        userCoupon.setCouponCode(coupon.getCode());
+        userCoupon.setDescription("通过兑换码获得：" + coupon.getName());
+        
+        // 转换CouponType枚举
+        if (coupon.getType() == Coupon.CouponType.FIXED) {
+            userCoupon.setType(UserCoupon.CouponType.FIXED);
+        } else if (coupon.getType() == Coupon.CouponType.PERCENT) {
+            userCoupon.setType(UserCoupon.CouponType.PERCENT);
+        }
+        
+        userCoupon.setDiscountValue(coupon.getDiscountValue());
+        userCoupon.setMinAmount(coupon.getMinAmount());
+        userCoupon.setExpireTime(coupon.getEndTime());
+        userCoupon.setUsageRestriction("通过兑换码获得");
+        userCoupon.setApplicableCategory("All courses");
+        
+        userCoupon.setStatus(UserCoupon.CouponStatus.UNUSED);
+        userCoupon.setReceiveTime(LocalDateTime.now());
+        userCouponRepository.save(userCoupon);
+        
+        // 更新已使用数量
+        coupon.setUsedCount(coupon.getUsedCount() + 1);
+        couponRepository.update(coupon);
+        
+        return true;
     }
 }

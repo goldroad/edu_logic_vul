@@ -195,4 +195,45 @@ public class CouponController {
         
         return response;
     }
+    
+    /**
+     * 兑换优惠券（通过兑换码）
+     */
+    @PostMapping("/exchange")
+    public Map<String, Object> exchangeCoupon(@RequestBody Map<String, String> request, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            response.put("success", false);
+            response.put("message", "请先登录");
+            return response;
+        }
+        
+        String code = request.get("code");
+        if (code == null || code.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "兑换码不能为空");
+            return response;
+        }
+        
+        try {
+            // 通过兑换码兑换优惠券
+            // 存在并发漏洞
+            boolean success = couponService.exchangeCouponByCode(code.trim(), currentUser);
+            
+            if (success) {
+                response.put("success", true);
+                response.put("message", "优惠券兑换成功");
+            } else {
+                response.put("success", false);
+                response.put("message", "兑换失败，兑换码无效或已被使用");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "兑换失败：" + e.getMessage());
+        }
+        
+        return response;
+    }
 }

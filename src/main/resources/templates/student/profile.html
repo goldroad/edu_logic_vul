@@ -157,9 +157,6 @@
                                     <button type="button" class="btn btn-outline-secondary me-md-2" onclick="changePassword()">
                                         <i class="fas fa-key me-1"></i>修改密码
                                     </button>
-                                    <button type="button" class="btn btn-outline-info" onclick="viewHistory()">
-                                        <i class="fas fa-history me-1"></i>查看历史
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -392,11 +389,6 @@
                 console.error('Error:', error);
                 alert('网络错误，请稍后重试');
             });
-        }
-
-        // 查看历史记录
-        function viewHistory() {
-            window.location.href = '/edu/student/orders';
         }
 
         // 页面加载完成后的处理

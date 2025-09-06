@@ -248,10 +248,6 @@
             const courseId = button.getAttribute('data-course-id');
             const originalPrice = button.getAttribute('data-course-price');
             
-            // 确认购买
-            if (!confirm(`确认购买此课程吗？ \n 课程价格：¥${originalPrice}`)) {
-                return;
-            }
             
             // 显示加载状态
             const originalText = button.innerHTML;
